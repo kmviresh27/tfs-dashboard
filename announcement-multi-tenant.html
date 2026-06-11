@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AV Dashboard — Multi-Tenant</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #0d1117;
+    --surface:  #161b22;
+    --surface2: #1c2330;
+    --border:   rgba(255,255,255,0.08);
+    --accent:   #1492ff;
+    --accent2:  #0af;
+    --green:    #3fb950;
+    --yellow:   #d29922;
+    --purple:   #a371f7;
+    --text:     #e6edf3;
+    --muted:    #7d8590;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    font-family: 'Inter', system-ui, sans-serif;
+    color: var(--text);
+    overflow: hidden;
+  }
+
+  /* ── Grid layout ──────────────────────────────────── */
+  .slide {
+    width: 100vw; height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    grid-template-columns: 1fr;
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ── Animated background grid ─────────────────────── */
+  .slide::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(20,146,255,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(20,146,255,.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    animation: gridMove 20s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+  @keyframes gridMove {
+    0%   { background-position: 0 0; }
+    100% { background-position: 48px 48px; }
+  }
+
+  /* Glow orbs */
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    z-index: 0;
+    animation: pulse 8s ease-in-out infinite;
+  }
+  .orb-1 { width: 500px; height: 500px; background: rgba(20,146,255,.12); top: -120px; left: -100px; }
+  .orb-2 { width: 400px; height: 400px; background: rgba(163,113,247,.10); bottom: -80px; right: 80px; animation-delay: -4s; }
+  .orb-3 { width: 300px; height: 300px; background: rgba(63,185,80,.07); top: 40%; left: 45%; animation-delay: -2s; }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.7; transform: scale(1.08); }
+  }
+
+  /* ── HEADER ───────────────────────────────────────── */
+  header {
+    position: relative; z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 48px 0;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .logo-icon {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 900; color: #0b5ed7;
+  }
+  .logo-text { font-size: 17px; font-weight: 700; letter-spacing: .5px; }
+  .logo-text span { color: var(--accent); }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(63,185,80,.12);
+    border: 1px solid rgba(63,185,80,.3);
+    color: var(--green);
+    font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+    padding: 5px 14px;
+    text-transform: uppercase;
+  }
+  .badge::before { content: '●'; font-size: 8px; animation: blink 1.4s ease-in-out infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  /* ── MAIN CONTENT ─────────────────────────────────── */
+  main {
+    position: relative; z-index: 10;
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 32px;
+    padding: 28px 48px 0;
+    align-items: start;
+  }
+
+  /* Left column */
+  .hero { display: flex; flex-direction: column; gap: 20px; }
+
+  .eyebrow {
+    font-size: 11px; font-weight: 700; letter-spacing: 2.5px;
+    color: var(--accent); text-transform: uppercase;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .eyebrow::before { content: ''; width: 28px; height: 2px; background: var(--accent); }
+
+  h1 {
+    font-size: clamp(30px, 3.2vw, 46px);
+    font-weight: 900;
+    line-height: 1.08;
+    letter-spacing: -1.5px;
+  }
+  h1 .line2 {
+    background: linear-gradient(90deg, var(--accent), var(--accent2), var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subline {
+    font-size: 14px; color: var(--muted); line-height: 1.6; max-width: 430px;
+  }
+
+  /* Capability pills */
+  .pills {
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .pill {
+    font-size: 11px; font-weight: 600; letter-spacing: .4px;
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    display: flex; align-items: center; gap: 5px;
+    transition: all .2s;
+  }
+  .pill:hover { border-color: var(--accent); color: var(--text); }
+  .pill.accent { border-color: rgba(20,146,255,.35); color: var(--accent); background: rgba(20,146,255,.07); }
+  .pill.green  { border-color: rgba(63,185,80,.35);  color: var(--green);  background: rgba(63,185,80,.07); }
+  .pill.purple { border-color: rgba(163,113,247,.35);color: var(--purple); background: rgba(163,113,247,.07); }
+  .pill.yellow { border-color: rgba(210,153,34,.35); color: var(--yellow); background: rgba(210,153,34,.07); }
+
+  /* Feature cards */
+  .cards { display: flex; flex-direction: column; gap: 10px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 14px 18px;
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 12px;
+    align-items: start;
+    transition: border-color .2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::after {
+    content: '';
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--card-color, var(--accent));
+    opacity: 0;
+    transition: opacity .2s;
+  }
+  .card:hover { border-color: rgba(255,255,255,.14); }
+  .card:hover::after { opacity: 1; }
+
+  .card-icon {
+    width: 36px; height: 36px;
+    background: var(--card-bg, rgba(20,146,255,.12));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .card-title { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+  .card-desc  { font-size: 11.5px; color: var(--muted); line-height: 1.55; }
+
+  /* Architecture diagram */
+  .arch {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 20px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .arch-title {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+    color: var(--muted); text-transform: uppercase;
+    border-bottom: 1px solid var(--border); padding-bottom: 10px;
+  }
+
+  .tenant-row {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 0;
+    border: 1px solid var(--border);
+  }
+  .tenant-label {
+    background: var(--surface2);
+    border-right: 1px solid var(--border);
+    padding: 10px 12px;
+    display: flex; flex-direction: column; justify-content: center;
+    gap: 3px;
+  }
+  .tenant-name { font-size: 11px; font-weight: 700; white-space: nowrap; }
+  .tenant-type { font-size: 9.5px; color: var(--muted); }
+
+  .tenant-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+
+  .dept-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .dept-tag {
+    font-size: 10px; font-weight: 600; padding: 2px 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+  }
+  .dept-tag.active { border-color: rgba(20,146,255,.4); color: var(--accent); background: rgba(20,146,255,.08); }
+
+  .connector-row {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 10px; color: var(--muted);
+  }
+  .connector-line {
+    flex: 1; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+  }
+
+  /* Platform row */
+  .platform-box {
+    background: rgba(20,146,255,.06);
+    border: 1px solid rgba(20,146,255,.2);
+    padding: 10px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .platform-label { font-size: 11px; font-weight: 800; color: var(--accent); letter-spacing: .5px; }
+  .platform-tags { display: flex; gap: 6px; }
+  .ptag {
+    font-size: 9.5px; font-weight: 600; padding: 2px 8px;
+    background: rgba(20,146,255,.15); color: var(--accent2);
+    border: 1px solid rgba(20,146,255,.25);
+  }
+
+  /* Stats row */
+  .stats {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    text-align: center;
+  }
+  .stat-val { font-size: 22px; font-weight: 900; line-height: 1; }
+  .stat-val.a { color: var(--accent); }
+  .stat-val.g { color: var(--green); }
+  .stat-val.p { color: var(--purple); }
+  .stat-val.y { color: var(--yellow); }
+  .stat-lbl { font-size: 10px; color: var(--muted); margin-top: 4px; letter-spacing: .3px; }
+
+  /* ── FOOTER ───────────────────────────────────────── */
+  footer {
+    position: relative; z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 48px 18px;
+    border-top: 1px solid var(--border);
+    margin-top: 14px;
+  }
+  .footer-left { display: flex; align-items: center; gap: 20px; font-size: 11px; color: var(--muted); }
+  .footer-left strong { color: var(--text); }
+  .footer-divider { width: 1px; height: 14px; background: var(--border); }
+  .cta {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .cta-btn {
+    font-size: 12px; font-weight: 700; letter-spacing: .5px;
+    padding: 8px 22px;
+    background: var(--accent);
+    color: #fff; border: none; cursor: pointer;
+    text-decoration: none;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: background .2s;
+  }
+  .cta-btn:hover { background: #0a7fe6; }
+  .cta-outline {
+    font-size: 12px; font-weight: 600;
+    padding: 8px 18px;
+    background: transparent;
+    color: var(--text); border: 1px solid var(--border); cursor: pointer;
+    text-decoration: none;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: border-color .2s;
+  }
+  .cta-outline:hover { border-color: rgba(255,255,255,.25); }
+
+  /* Problem statement block */
+  .problem-box {
+    background: rgba(235,63,63,.06);
+    border: 1px solid rgba(235,63,63,.2);
+    border-left: 3px solid #eb3f3f;
+    padding: 12px 16px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .problem-label {
+    font-size: 10px; font-weight: 800; letter-spacing: 1.8px;
+    color: #eb3f3f; text-transform: uppercase;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .problem-list {
+    list-style: none; display: flex; flex-direction: column; gap: 5px;
+    padding: 0; margin: 0;
+  }
+  .problem-list li {
+    font-size: 11.5px; line-height: 1.45;
+    display: flex; align-items: flex-start; gap: 7px;
+  }
+  .problem-list li::before {
+    content: '✗'; color: rgba(235,63,63,.7); font-size: 11px;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .solution-bridge {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 10px; font-weight: 700; letter-spacing: 1.2px;
+    color: var(--green); text-transform: uppercase;
+  }
+  .solution-bridge::before,
+  .solution-bridge::after {
+    content: ''; flex: 1; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(63,185,80,.3), transparent);
+  }
+
+  /* Fade-in entrance */
+  .fade-in { animation: fadeIn .6s ease both; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  .delay-1 { animation-delay: .1s; }
+  .delay-2 { animation-delay: .2s; }
+  .delay-3 { animation-delay: .3s; }
+  .delay-4 { animation-delay: .4s; }
+  .delay-5 { animation-delay: .5s; }
+  .delay-6 { animation-delay: .6s; }
+</style>
+</head>
+<body>
+<div class="slide">
+
+  <!-- Background -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="logo fade-in">
+      <div class="logo-icon">PHILIPS</div>
+      <div class="logo-text"><span>TFS</span> Dashboard</div>
+    </div>
+    <div class="badge fade-in delay-1">Now Available · Multi-Tenant</div>
+  </header>
+
+  <!-- Main -->
+  <main>
+
+    <!-- LEFT: Hero + Feature cards -->
+    <div class="hero">
+
+      <div class="fade-in delay-1">
+        <div class="eyebrow">Problem → Solution · Multi-Tenant</div>
+      </div>
+
+      <h1 class="fade-in delay-2">
+        One Platform.<br/>
+        <span class="line2">Any Team.<br/>Every Workflow.</span>
+      </h1>
+
+      <p class="subline fade-in delay-2">
+        Engineering visibility was fragmented across ISP teams — no unified view, no automated rollup, no cross-team isolation.
+      </p>
+
+      <div class="problem-box fade-in delay-3">
+        <div class="problem-label">⚠ The Problem We Solved</div>
+        <ul class="problem-list">
+          <li>TFS queries maintained manually per team — no automated rollup or unified PI view</li>
+          <li>Defect trends &amp; test coverage required manual Excel extraction every sprint</li>
+          <li>No isolation between teams — shared config meant no per-team branding, roles, or policies</li>
+          <li>Leadership had no real-time PI health or feature lifecycle visibility without status meetings</li>
+        </ul>
+      </div>
+
+      <div class="solution-bridge fade-in delay-3">Solution</div>
+
+      <div class="pills fade-in delay-4">
+        <span class="pill accent">🏢 Multi-Tenant</span>
+        <span class="pill green">🔒 Dept Isolation</span>
+        <span class="pill purple">👤 Role-Based Access</span>
+        <span class="pill yellow">⚡ Live 30-min Refresh</span>
+        <span class="pill accent">🔗 TFS + Azure DevOps</span>
+        <span class="pill green">📊 PI / Sprint Tracking</span>
+      </div>
+
+      <div class="cards fade-in delay-4">
+        <div class="card" style="--card-color:#1492ff; --card-bg:rgba(20,146,255,.1)">
+          <div class="card-icon">🏢</div>
+          <div>
+            <div class="card-title">Department Isolation</div>
+            <div class="card-desc">Each department gets its own config, connection, branding, custom roles, and data — completely separated. No cross-department data leakage.</div>
+          </div>
+        </div>
+        <div class="card" style="--card-color:#a371f7; --card-bg:rgba(163,113,247,.1)">
+          <div class="card-icon">🔒</div>
+          <div>
+            <div class="card-title">Role & Visibility Policies</div>
+            <div class="card-desc">Super Admin → Dept Admin → Exec / RTE / PM / SM / Custom roles. Fine-grained control over which pages, tabs, and charts each role can see.</div>
+          </div>
+        </div>
+        <div class="card" style="--card-color:#3fb950; --card-bg:rgba(63,185,80,.1)">
+          <div class="card-icon">🔌</div>
+          <div>
+            <div class="card-title">Dual Backend Support</div>
+            <div class="card-desc">Connect on-premise TFS (NTLM) or cloud Azure DevOps (PAT) per department — even mix both in the same platform instance.</div>
+          </div>
+        </div>
+        <div class="card" style="--card-color:#d29922; --card-bg:rgba(210,153,34,.1)">
+          <div class="card-icon">📦</div>
+          <div>
+            <div class="card-title">Self-Contained & Portable</div>
+            <div class="card-desc">Node.js server + Vite SPA. Zero external DB needed. Config-driven onboarding checklist, migration guide, and full docs included.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: Architecture + Stats -->
+    <div style="display:flex; flex-direction:column; gap:12px;">
+
+      <div class="arch fade-in delay-3">
+        <div class="arch-title">Architecture — Multi-Tenant Overview</div>
+
+        <!-- Platform layer -->
+        <div class="platform-box">
+          <div>
+            <div class="platform-label">TFS Dashboard Platform</div>
+            <div style="font-size:10px; color:var(--muted); margin-top:2px;">Single Node.js Server · Shared Auth · Central Super Admin</div>
+          </div>
+          <div class="platform-tags">
+            <span class="ptag">http://144.54.104.49:3000</span>
+            <span class="ptag">REST API</span>
+          </div>
+        </div>
+
+        <div class="connector-row">
+          <div class="connector-line"></div>
+          <span>Isolated Tenant Configs</span>
+          <div class="connector-line"></div>
+        </div>
+
+        <!-- Tenant rows -->
+        <div class="tenant-row">
+          <div class="tenant-label">
+            <div class="tenant-name">Dept A</div>
+            <div class="tenant-type">On-Premise TFS</div>
+          </div>
+          <div class="tenant-body">
+            <div class="dept-tags">
+              <span class="dept-tag active">PI Tracker</span>
+              <span class="dept-tag active">Feature Lifecycle</span>
+              <span class="dept-tag active">Defect Ratio</span>
+              <span class="dept-tag">NTLM Auth</span>
+            </div>
+            <div style="font-size:9.5px; color:var(--muted);">Custom roles: EI II AV&amp;I RTE, Directors · 3 custom PI labels</div>
+          </div>
+        </div>
+
+        <div class="tenant-row">
+          <div class="tenant-label">
+            <div class="tenant-name">Dept B</div>
+            <div class="tenant-type">Azure DevOps ☁</div>
+          </div>
+          <div class="tenant-body">
+            <div class="dept-tags">
+              <span class="dept-tag active">PI Tracker</span>
+              <span class="dept-tag active">Roadmap</span>
+              <span class="dept-tag active">Cross-PI Trends</span>
+              <span class="dept-tag">PAT Auth</span>
+            </div>
+            <div style="font-size:9.5px; color:var(--muted);">Independent branding, separate iteration path, own PAT token</div>
+          </div>
+        </div>
+
+        <div class="tenant-row" style="opacity:.55; border-style:dashed;">
+          <div class="tenant-label">
+            <div class="tenant-name">Dept N</div>
+            <div class="tenant-type">Any ADO / TFS</div>
+          </div>
+          <div class="tenant-body">
+            <div class="dept-tags">
+              <span class="dept-tag">Add Department →</span>
+            </div>
+            <div style="font-size:9.5px; color:var(--muted);">Provision in under 5 minutes via Super Admin panel</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Stats -->
+      <div class="stats fade-in delay-4">
+        <div class="stat">
+          <div class="stat-val a">∞</div>
+          <div class="stat-lbl">Departments</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val g">5+</div>
+          <div class="stat-lbl">Built-in Roles</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val p">30m</div>
+          <div class="stat-lbl">Live Refresh</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val y">2</div>
+          <div class="stat-lbl">Backend Types</div>
+        </div>
+      </div>
+
+      <!-- What's new list -->
+      <div class="arch fade-in delay-5" style="padding:14px 18px;">
+        <div class="arch-title" style="margin-bottom:10px;">What's New</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px 16px;">
+
+          <!-- Delivery -->
+          <div style="grid-column:1/-1; font-size:9px; font-weight:800; letter-spacing:1.6px; color:var(--accent); text-transform:uppercase; margin:4px 0 2px;">📊 Delivery</div>
+          <div style="font-size:11px; color:var(--muted); display:flex; gap:6px; align-items:flex-start;"><span style="color:var(--green); flex-shrink:0">✓</span> PI &amp; Sprint Tracking — PI1–PI4, forecast vs actual velocity</div>
+          <div style="font-size:11px; color:var(--muted); display:flex; gap:6px; align-items:flex-start;"><span style="color:var(--green); flex-shrink:0">✓</span> Feature Lifecycle — Forecasted → New → Approved → Done</div>
+          <div style="font-size:11px; color:var(--muted); display:flex; gap:6px; align-items:flex-start;"><span style="color:var(--green); flex-shrink:0">✓</span> Scope Change Tracker — sprint-over-sprint delta &amp; scope creep</div>
+          <div style="font-size:11px; color:var(--muted); display:flex; gap:6px; align-items:flex-start;"><span style="color:var(--green); flex-shrink:0">✓</span> Sprint Burndown &amp; Velocity — committed vs completed</div>
+
+          <!-- Quality -->
+          <div style="grid-column:1/-1; font-size:9px; font-weight:800; letter-spacing:1.6px; color:#eb3f3f; text-transform:uppercase; margin:4px 0 2px;">🐛 Quality</div>
+          <div style="font-size:11px; color:var(--muted); display:flex; gap:6px; align-items:flex-start;"><span style="color:var(--green); flex-shrink:0">✓</span> Defect Intelligence — escape rate, ratio, severity breakdown</div>
+          <div style="font-size:11px; color:var(--muted); display:flex; gap:6px; align-items:flex-start;"><span style="color:var(--green); flex-shrink:0">✓</span> Test Coverage — 294K+ test cases, automation %, snapshots</div>
+
+          <!-- Process -->
+          <div style="grid-column:1/-1; font-size:9px; font-weight:800; letter-spacing:1.6px; color:var(--yellow); text-transform:uppercase; margin:4px 0 2px;">⚙️ Process</div>
+          <div style="font-size:11px; color:var(--muted); display:flex; gap:6px; align-items:flex-start;"><span style="color:var(--green); flex-shrink:0">✓</span> PI Readiness Checks — automated TFS consistency validation</div>
+          <div style="font-size:11px; color:var(--muted); display:flex; gap:6px; align-items:flex-start;"><span style="color:var(--green); flex-shrink:0">✓</span> KPI Tracker — 30 metrics, RAG status, 4 categories</div>
+
+          <!-- Platform -->
+          <div style="grid-column:1/-1; font-size:9px; font-weight:800; letter-spacing:1.6px; color:var(--purple); text-transform:uppercase; margin:4px 0 2px;">🏢 Platform</div>
+          <div style="font-size:11px; color:var(--muted); display:flex; gap:6px; align-items:flex-start;"><span style="color:var(--green); flex-shrink:0">✓</span> Multi-Tenant isolation — per-dept config, branding &amp; roles</div>
+          <div style="font-size:11px; color:var(--muted); display:flex; gap:6px; align-items:flex-start;"><span style="color:var(--green); flex-shrink:0">✓</span> Admin &amp; Observability — circuit breaker, cache, super admin</div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="fade-in delay-6">
+    <div class="footer-left">
+      <span><strong>AV Dashboard</strong> · Internal Engineering Platform</span>
+      <div class="footer-divider"></div>
+      <span>Node.js + React · Zero external DB</span>
+      <div class="footer-divider"></div>
+      <span>Provisionable in &lt; 5 min per tenant</span>
+    </div>
+    <div class="cta">
+      <a href="http://localhost:3000" class="cta-outline">📖 View Docs</a>
+      <a href="http://localhost:3000" class="cta-btn">🚀 Open Dashboard →</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

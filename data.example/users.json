@@ -1,0 +1,9 @@
+[
+  {
+    "key": "admin",
+    "name": "Admin User",
+    "password": "changeme",
+    "isSuperAdmin": true,
+    "departments": {}
+  }
+]

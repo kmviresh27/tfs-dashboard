@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checklists · AV Dashboard</title>
+<style>
+  :root {
+    --bg:#141414; --surface:#1e1e1e; --surface2:#2b2b2b; --surface3:#333;
+    --border:#3a3a3a; --primary:#1492ff; --success:#068443;
+    --amber:#e8a217; --danger:#eb3f3f; --purple:#a78bfa; --teal:#21837c;
+    --muted:#adadad; --muted2:#888; --text:#e8e8e8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;line-height:1.6;}
+  .app{display:flex;min-height:100vh;}
+  .sidenav{width:240px;flex-shrink:0;background:#111;border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:0 0 40px;}
+  .main{flex:1;padding:40px 52px;max-width:980px;}
+
+  /* Sidenav */
+  .sidenav-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border);}
+  .sidenav-logo .title{font-size:13px;font-weight:700;color:#fff;line-height:1.4;}
+  .sidenav-logo .sub{font-size:11px;color:var(--muted);margin-top:3px;}
+  .nav-section{padding:16px 14px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted2);}
+  .nav-item{display:flex;align-items:center;gap:9px;padding:8px 18px;cursor:pointer;font-size:13px;color:var(--muted);border-left:2px solid transparent;transition:all .15s;text-decoration:none;}
+  .nav-item:hover{color:#fff;background:#1a1a1a;}
+  .nav-item.active{color:#fff;border-left-color:var(--primary);background:#0d1e33;}
+  .nav-item .icon{font-size:14px;flex-shrink:0;}
+  .nav-divider{margin:8px 16px;border:none;border-top:1px solid var(--border);}
+  .nav-progress{margin:2px 18px 0;height:3px;background:var(--surface3);border-radius:2px;overflow:hidden;}
+  .nav-progress-bar{height:100%;background:var(--success);border-radius:2px;transition:width .4s;}
+
+  /* Page header */
+  .page-header{display:flex;align-items:flex-start;gap:16px;padding-bottom:24px;margin-bottom:32px;border-bottom:2px solid var(--primary);}
+  .ph-icon{font-size:42px;line-height:1;}
+  .ph-title{font-size:26px;font-weight:700;color:#fff;margin-bottom:4px;}
+  .ph-sub{font-size:13px;color:var(--muted);margin-bottom:10px;}
+  .ph-meta{display:flex;gap:10px;flex-wrap:wrap;}
+  .ph-chip{font-size:11px;padding:3px 10px;border:1px solid var(--border);color:var(--muted);background:var(--surface2);}
+  .ph-chip b{color:#fff;}
+  .back-link{display:inline-flex;align-items:center;gap:6px;margin-bottom:24px;font-size:12px;color:var(--muted);text-decoration:none;}
+  .back-link:hover{color:#fff;}
+
+  /* Checklist cards */
+  .checklist-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:40px;overflow:hidden;}
+  .checklist-header{padding:18px 24px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .checklist-title{font-size:17px;font-weight:700;color:#fff;display:flex;align-items:center;gap:10px;}
+  .checklist-meta{font-size:12px;color:var(--muted);margin-top:3px;}
+  .progress-ring-wrap{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .progress-pill{font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:rgba(6,132,67,.15);color:var(--success);border:1px solid rgba(6,132,67,.3);}
+  .progress-pill.partial{background:rgba(232,162,23,.12);color:var(--amber);border-color:rgba(232,162,23,.3);}
+  .progress-pill.zero{background:var(--surface2);color:var(--muted);border-color:var(--border);}
+  .checklist-progress{height:4px;background:var(--surface2);}
+  .checklist-progress-bar{height:100%;background:var(--success);transition:width .4s;border-radius:0 2px 2px 0;}
+
+  /* Groups and items */
+  .checklist-body{padding:0;}
+  .group{border-bottom:1px solid var(--border);}
+  .group:last-child{border-bottom:none;}
+  .group-header{padding:10px 24px 8px;background:rgba(255,255,255,.02);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);display:flex;align-items:center;gap:8px;}
+  .group-header .group-icon{font-size:13px;}
+  .item{display:flex;align-items:flex-start;gap:12px;padding:10px 24px;border-bottom:1px solid rgba(255,255,255,.04);transition:background .1s;}
+  .item:last-child{border-bottom:none;}
+  .item:hover{background:rgba(255,255,255,.03);}
+  .item input[type=checkbox]{width:16px;height:16px;flex-shrink:0;margin-top:2px;accent-color:var(--success);cursor:pointer;}
+  .item-content{flex:1;}
+  .item-label{font-size:13px;font-weight:500;color:var(--text);cursor:pointer;display:block;}
+  .item-label.checked{text-decoration:line-through;color:var(--muted2);}
+  .item-note{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.5;}
+  .item-tag{display:inline-block;font-size:10px;padding:1px 7px;border-radius:999px;margin-left:6px;font-weight:600;vertical-align:middle;}
+  .item-tag.required{background:rgba(235,63,63,.12);color:#f87171;border:1px solid rgba(235,63,63,.25);}
+  .item-tag.optional{background:rgba(20,146,255,.1);color:#60b3ff;border:1px solid rgba(20,146,255,.2);}
+  .item-tag.migration{background:rgba(167,139,250,.1);color:var(--purple);border:1px solid rgba(167,139,250,.25);}
+
+  /* Actions */
+  .checklist-footer{padding:12px 24px;background:rgba(255,255,255,.02);display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);}
+  .btn-clear{font-size:11px;color:var(--muted2);background:none;border:1px solid var(--border);padding:4px 12px;border-radius:4px;cursor:pointer;}
+  .btn-clear:hover{color:var(--text);border-color:var(--muted2);}
+  .btn-print{font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;padding:4px 8px;}
+  .btn-print:hover{color:#fff;}
+  .complete-badge{display:none;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--success);}
+  .complete-badge.show{display:flex;}
+
+  /* Section headings in main */
+  .section-intro{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:28px;padding:16px 20px;background:var(--surface);border-left:3px solid var(--primary);border-radius:0 6px 6px 0;}
+
+  @media print {
+    .sidenav,.back-link,.btn-clear,.btn-print,.checklist-footer{display:none!important;}
+    .main{padding:20px;}
+    .checklist-card{break-inside:avoid;}
+    .item{padding:6px 12px;}
+    body{background:#fff;color:#111;}
+    .checklist-card,.checklist-header{background:#fff;border-color:#ccc;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- Sidenav -->
+<nav class="sidenav">
+  <div class="sidenav-logo">
+    <div class="title">AV Dashboard</div>
+    <div class="sub">Deployment Checklists</div>
+  </div>
+  <div class="nav-section">Checklists</div>
+  <a class="nav-item active" href="#fresh-install"><span class="icon">🆕</span>Fresh Installation</a>
+  <div class="nav-progress"><div class="nav-progress-bar" id="np-fresh" style="width:0%"></div></div>
+  <a class="nav-item" href="#migration"><span class="icon">🔄</span>TFS → ADO Migration</a>
+  <div class="nav-progress"><div class="nav-progress-bar" id="np-migration" style="width:0%"></div></div>
+  <a class="nav-item" href="#new-dept"><span class="icon">🏢</span>New Department</a>
+  <div class="nav-progress"><div class="nav-progress-bar" id="np-new-dept" style="width:0%"></div></div>
+  <a class="nav-item" href="#go-live"><span class="icon">🚀</span>Production Go-Live</a>
+  <div class="nav-progress"><div class="nav-progress-bar" id="np-go-live" style="width:0%"></div></div>
+  <a class="nav-item" href="#upgrade"><span class="icon">⬆️</span>Version Upgrade</a>
+  <div class="nav-progress"><div class="nav-progress-bar" id="np-upgrade" style="width:0%"></div></div>
+  <a class="nav-item" href="#user-onboard"><span class="icon">👤</span>User Onboarding</a>
+  <div class="nav-progress"><div class="nav-progress-bar" id="np-user-onboard" style="width:0%"></div></div>
+  <hr class="nav-divider">
+  <a class="nav-item" href="index.html"><span class="icon">🏠</span>Back to Docs</a>
+  <a class="nav-item" href="/"><span class="icon">📊</span>Open Dashboard</a>
+</nav>
+
+<!-- Main content -->
+<main class="main">
+  <a href="index.html" class="back-link">&#8592; Documentation Hub</a>
+
+  <div class="page-header">
+    <div class="ph-icon">✅</div>
+    <div>
+      <div class="ph-title">Deployment Checklists</div>
+      <div class="ph-sub">Step-by-step checklists for every deployment scenario. Progress saves automatically in your browser.</div>
+      <div class="ph-meta">
+        <div class="ph-chip">&#128993; <b>Required</b> — must do</div>
+        <div class="ph-chip">&#128994; <b>Optional</b> — recommended but not blocking</div>
+        <div class="ph-chip">&#128995; <b>Migration</b> — only for migration scenarios</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 1. Fresh Installation ═════════════════════════════════════════════ -->
+  <div class="checklist-card" id="fresh-install">
+    <div class="checklist-header">
+      <div>
+        <div class="checklist-title">🆕 Fresh Installation</div>
+        <div class="checklist-meta">For first-time setup on a new machine</div>
+      </div>
+      <div class="progress-ring-wrap">
+        <div class="progress-pill zero" id="pill-fresh">0 / 0</div>
+      </div>
+    </div>
+    <div class="checklist-progress"><div class="checklist-progress-bar" id="bar-fresh" style="width:0%"></div></div>
+    <div class="checklist-body">
+
+      <div class="group">
+        <div class="group-header"><span class="group-icon">🖥</span>Prerequisites</div>
+        <div class="item">
+          <input type="checkbox" id="fi-01" data-list="fresh">
+          <div class="item-content">
+            <label class="item-label" for="fi-01">Node.js 18+ installed <span class="item-tag required">required</span></label>
+            <div class="item-note">Run <code>node --version</code> — must show v18 or higher. Download from nodejs.org.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="fi-02" data-list="fresh">
+          <div class="item-content">
+            <label class="item-label" for="fi-02">Network access to Azure DevOps / TFS verified <span class="item-tag required">required</span></label>
+            <div class="item-note">Test with: <code>curl https://dev.azure.com/YourOrg</code> (or your TFS URL). Should return HTML/JSON, not a timeout.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="fi-03" data-list="fresh">
+          <div class="item-content">
+            <label class="item-label" for="fi-03">Personal Access Token (PAT) created <span class="item-tag required">required</span></label>
+            <div class="item-note">ADO: User Settings → Personal Access Tokens. Required scopes: <b>Work Items (Read)</b>. Copy and store the token securely — it won't be shown again.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="fi-04" data-list="fresh">
+          <div class="item-content">
+            <label class="item-label" for="fi-04">Area path and iteration path noted <span class="item-tag required">required</span></label>
+            <div class="item-note">In ADO: Project Settings → Boards → Area / Iterations. Note the exact paths including backslash separators (e.g. <code>MyProject\TeamA</code>).</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-header"><span class="group-icon">📦</span>Installation</div>
+        <div class="item">
+          <input type="checkbox" id="fi-05" data-list="fresh">
+          <div class="item-content">
+            <label class="item-label" for="fi-05">Package extracted to deployment folder <span class="item-tag required">required</span></label>
+            <div class="item-note">E.g. <code>C:\apps\av-dashboard\</code>. Avoid paths with spaces or special characters.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="fi-06" data-list="fresh">
+          <div class="item-content">
+            <label class="item-label" for="fi-06">Setup wizard run: <code>.\scripts\setup.ps1</code> <span class="item-tag required">required</span></label>
+            <div class="item-note">Wizard creates <code>config.json</code>, initialises <code>data/</code>, and creates the super-admin account.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="fi-07" data-list="fresh">
+          <div class="item-content">
+            <label class="item-label" for="fi-07">config.json reviewed and correct <span class="item-tag required">required</span></label>
+            <div class="item-note">Verify <code>baseUrl</code>, <code>pat</code>, <code>areaPath</code>, <code>iterationPath</code>. Change <code>sessionSecret</code> if setup didn't auto-generate one.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="fi-08" data-list="fresh">
+          <div class="item-content">
+            <label class="item-label" for="fi-08">Server starts without errors: <code>node server.js</code> <span class="item-tag required">required</span></label>
+            <div class="item-note">Watch the console for "Server started on port 3000" and no connection errors on first data fetch.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="fi-09" data-list="fresh">
+          <div class="item-content">
+            <label class="item-label" for="fi-09">Login works at <code>http://localhost:3000</code> <span class="item-tag required">required</span></label>
+            <div class="item-note">Use the super-admin email and password set during setup.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-header"><span class="group-icon">🔍</span>Verification</div>
+        <div class="item">
+          <input type="checkbox" id="fi-10" data-list="fresh">
+          <div class="item-content">
+            <label class="item-label" for="fi-10">Dashboard loads data (not empty) <span class="item-tag required">required</span></label>
+            <div class="item-note">Navigate to Overview or Features. If charts show zeros, go to Settings → Connection and click Test Connection.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="fi-11" data-list="fresh">
+          <div class="item-content">
+            <label class="item-label" for="fi-11">PI list populated correctly <span class="item-tag required">required</span></label>
+            <div class="item-note">Check the PI pills in the top bar. If PIs are missing, verify <code>piNamingPattern</code> in Settings → PI Config matches your ADO iteration names.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="fi-12" data-list="fresh">
+          <div class="item-content">
+            <label class="item-label" for="fi-12">Branding customised <span class="item-tag optional">optional</span></label>
+            <div class="item-note">Settings → Branding: set company name, app name, logo, and primary colour to match your organisation.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="fi-13" data-list="fresh">
+          <div class="item-content">
+            <label class="item-label" for="fi-13">Windows service installed for auto-start <span class="item-tag optional">optional</span></label>
+            <div class="item-note">Run <code>.\scripts\deploy.ps1</code> to install as a Windows service via NSSM. Service name: <code>AVDashboard</code>.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="fi-14" data-list="fresh">
+          <div class="item-content">
+            <label class="item-label" for="fi-14">Firewall port opened for network access <span class="item-tag optional">optional</span></label>
+            <div class="item-note">Run as admin: <code>New-NetFirewallRule -DisplayName "AV Dashboard" -Direction Inbound -Protocol TCP -LocalPort 3000 -Action Allow</code></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="checklist-footer">
+      <div>
+        <div class="complete-badge" id="done-fresh">✅ All items complete!</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn-print" onclick="window.print()">🖨 Print</button>
+        <button class="btn-clear" data-clear="fresh">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 2. TFS → ADO Migration ════════════════════════════════════════════ -->
+  <div class="checklist-card" id="migration">
+    <div class="checklist-header">
+      <div>
+        <div class="checklist-title">🔄 TFS → Azure DevOps Migration</div>
+        <div class="checklist-meta">For teams moving from on-prem TFS to Azure DevOps cloud (or vice versa)</div>
+      </div>
+      <div class="progress-ring-wrap">
+        <div class="progress-pill zero" id="pill-migration">0 / 0</div>
+      </div>
+    </div>
+    <div class="checklist-progress"><div class="checklist-progress-bar" id="bar-migration" style="width:0%"></div></div>
+    <div class="checklist-body">
+
+      <div class="group">
+        <div class="group-header"><span class="group-icon">📋</span>Pre-Migration Assessment</div>
+        <div class="item">
+          <input type="checkbox" id="mg-01" data-list="migration">
+          <div class="item-content">
+            <label class="item-label" for="mg-01">New ADO project URL and organisation noted <span class="item-tag migration">migration</span></label>
+            <div class="item-note">Format: <code>https://dev.azure.com/{org}/{project}</code>. Confirm the project name matches exactly (case-sensitive).</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="mg-02" data-list="migration">
+          <div class="item-content">
+            <label class="item-label" for="mg-02">New PAT created for the ADO cloud instance <span class="item-tag required">required</span></label>
+            <div class="item-note">Old TFS PATs do not work with Azure DevOps cloud. Generate a new PAT at <code>dev.azure.com</code> with Work Items (Read) scope.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="mg-03" data-list="migration">
+          <div class="item-content">
+            <label class="item-label" for="mg-03">Area path verified in new ADO project <span class="item-tag required">required</span></label>
+            <div class="item-note">In ADO: Project Settings → Boards → Areas. The area path structure may differ from your TFS instance.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="mg-04" data-list="migration">
+          <div class="item-content">
+            <label class="item-label" for="mg-04">Iteration path structure reviewed in new ADO project <span class="item-tag required">required</span></label>
+            <div class="item-note">Check ADO: Project Settings → Boards → Iterations. Sprint naming may have changed (e.g. from "PI1 S1" to "PI1-SP1"). Note the exact format.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="mg-05" data-list="migration">
+          <div class="item-content">
+            <label class="item-label" for="mg-05">Work item type names confirmed <span class="item-tag migration">migration</span></label>
+            <div class="item-note">ADO cloud process templates may use different type names (e.g. "User Story" instead of "Feature"). Check in ADO Project Settings → Process.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="mg-06" data-list="migration">
+          <div class="item-content">
+            <label class="item-label" for="mg-06">Custom field names noted if any <span class="item-tag optional">optional</span></label>
+            <div class="item-note">If your TFS used custom fields (e.g. for defect escape, severity), verify they exist in ADO under the new process template with the same field reference names.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-header"><span class="group-icon">⚙</span>Configuration Update</div>
+        <div class="item">
+          <input type="checkbox" id="mg-07" data-list="migration">
+          <div class="item-content">
+            <label class="item-label" for="mg-07">Department config updated: <code>baseUrl</code> changed to ADO URL <span class="item-tag required">required</span></label>
+            <div class="item-note">In Admin → Department → Connection (or <code>data/departments/{id}/config.json</code>): change <code>baseUrl</code> to the new ADO URL.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="mg-08" data-list="migration">
+          <div class="item-content">
+            <label class="item-label" for="mg-08"><code>apiVersion</code> updated to <code>6.0</code> <span class="item-tag required">required</span></label>
+            <div class="item-note">Azure DevOps cloud uses API version 6.0. Change in the department config or Settings → Connection.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="mg-09" data-list="migration">
+          <div class="item-content">
+            <label class="item-label" for="mg-09">New PAT saved in department config <span class="item-tag required">required</span></label>
+            <div class="item-note">Admin → Department → Connection → PAT field. Or edit <code>data/departments/{id}/config.json</code> directly (restart server after).</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="mg-10" data-list="migration">
+          <div class="item-content">
+            <label class="item-label" for="mg-10"><code>areaPath</code> updated to match new ADO structure <span class="item-tag required">required</span></label>
+            <div class="item-note">The ADO area path root may differ from TFS. Verify it with a test WIQL query in ADO.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="mg-11" data-list="migration">
+          <div class="item-content">
+            <label class="item-label" for="mg-11"><code>iterationPath</code> and <code>piNamingPattern</code> updated <span class="item-tag required">required</span></label>
+            <div class="item-note">ADO projects often use different PI naming. Update <code>piNamingPattern</code> (e.g. <code>PI{yy}.{n}</code>) and <code>sprintSubpathPattern</code> (e.g. <code>{pi}-{sprint}</code>) to match.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="mg-12" data-list="migration">
+          <div class="item-content">
+            <label class="item-label" for="mg-12"><code>sprintLabels</code> updated if sprints were renamed <span class="item-tag migration">migration</span></label>
+            <div class="item-note">If sprint labels changed (e.g. from S1/S2/S3 to SP1/SP2/SP3), update <code>sprintLabels</code> in Settings → PI Config or department config.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="mg-13" data-list="migration">
+          <div class="item-content">
+            <label class="item-label" for="mg-13">Field mappings verified (feature type, defect type, effort field) <span class="item-tag migration">migration</span></label>
+            <div class="item-note">Settings → Field Mappings. If ADO uses "User Story" instead of "Feature" or "Bug" instead of custom defect type, update these.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="mg-14" data-list="migration">
+          <div class="item-content">
+            <label class="item-label" for="mg-14"><code>plannedForField</code> set if ADO uses "Planned For" instead of Iteration Path <span class="item-tag optional">optional</span></label>
+            <div class="item-note">Some ADO 2021 process templates use a custom "Planned For" field instead of <code>System.IterationPath</code>. If features show as "Unassigned", set this field in Settings → Field Mappings.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-header"><span class="group-icon">✅</span>Post-Migration Verification</div>
+        <div class="item">
+          <input type="checkbox" id="mg-15" data-list="migration">
+          <div class="item-content">
+            <label class="item-label" for="mg-15">Connection test passes in Settings → Connection <span class="item-tag required">required</span></label>
+            <div class="item-note">Click "Test Connection" — should return list of teams/area paths from the new ADO project.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="mg-16" data-list="migration">
+          <div class="item-content">
+            <label class="item-label" for="mg-16">Features and defects load correctly <span class="item-tag required">required</span></label>
+            <div class="item-note">Navigate to Features and Defects sections. Charts should show non-zero data for recent PIs.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="mg-17" data-list="migration">
+          <div class="item-content">
+            <label class="item-label" for="mg-17">Velocity data verified against ADO sprint data <span class="item-tag required">required</span></label>
+            <div class="item-note">Check Velocity section — sprint data should match what you see directly in ADO for recent sprints.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="mg-18" data-list="migration">
+          <div class="item-content">
+            <label class="item-label" for="mg-18">Historical PIs load without errors <span class="item-tag migration">migration</span></label>
+            <div class="item-note">If older PIs don't exist in the new ADO instance, they will return empty data (not errors) — this is expected. Check the browser console for unexpected 500 errors.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="mg-19" data-list="migration">
+          <div class="item-content">
+            <label class="item-label" for="mg-19">Old TFS PAT revoked (security) <span class="item-tag optional">optional</span></label>
+            <div class="item-note">Once migrated, revoke the old TFS PAT from your TFS instance to reduce attack surface.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="mg-20" data-list="migration">
+          <div class="item-content">
+            <label class="item-label" for="mg-20">Existing PI snapshots reviewed <span class="item-tag optional">optional</span></label>
+            <div class="item-note">Snapshots captured against the old TFS instance are still stored under <code>data/departments/{id}/snapshots/</code>. They may not match ADO data. Re-capture if needed.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="checklist-footer">
+      <div>
+        <div class="complete-badge" id="done-migration">✅ Migration checklist complete!</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn-print" onclick="window.print()">🖨 Print</button>
+        <button class="btn-clear" data-clear="migration">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 3. New Department Onboarding ═════════════════════════════════════ -->
+  <div class="checklist-card" id="new-dept">
+    <div class="checklist-header">
+      <div>
+        <div class="checklist-title">🏢 New Department Onboarding</div>
+        <div class="checklist-meta">Adding a new department (tenant) to an existing AV Dashboard deployment</div>
+      </div>
+      <div class="progress-ring-wrap">
+        <div class="progress-pill zero" id="pill-new-dept">0 / 0</div>
+      </div>
+    </div>
+    <div class="checklist-progress"><div class="checklist-progress-bar" id="bar-new-dept" style="width:0%"></div></div>
+    <div class="checklist-body">
+
+      <div class="group">
+        <div class="group-header"><span class="group-icon">📋</span>Information Gathering</div>
+        <div class="item">
+          <input type="checkbox" id="nd-01" data-list="new-dept">
+          <div class="item-content">
+            <label class="item-label" for="nd-01">Department ID decided (short, URL-safe) <span class="item-tag required">required</span></label>
+            <div class="item-note">E.g. <code>eng-platform</code>, <code>qa-team</code>, <code>mobile-app</code>. Lowercase, hyphens OK. Cannot be changed later without manual file renaming.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="nd-02" data-list="new-dept">
+          <div class="item-content">
+            <label class="item-label" for="nd-02">TFS/ADO connection details obtained from team <span class="item-tag required">required</span></label>
+            <div class="item-note">Need: base URL, PAT (Work Items Read), area path, iteration path, API version.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="nd-03" data-list="new-dept">
+          <div class="item-content">
+            <label class="item-label" for="nd-03">PI naming pattern for this team noted <span class="item-tag required">required</span></label>
+            <div class="item-note">Check how PIs appear in the ADO iteration tree. May differ from other departments.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="nd-04" data-list="new-dept">
+          <div class="item-content">
+            <label class="item-label" for="nd-04">Department admin user identified <span class="item-tag required">required</span></label>
+            <div class="item-note">Who will manage this department's users and settings? They need an account and the "admin" role for this department.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-header"><span class="group-icon">⚙</span>Configuration</div>
+        <div class="item">
+          <input type="checkbox" id="nd-05" data-list="new-dept">
+          <div class="item-content">
+            <label class="item-label" for="nd-05">Department created in Admin → ＋ New Department <span class="item-tag required">required</span></label>
+            <div class="item-note">Fill in all connection fields. Click Save — this creates <code>data/departments/{id}/config.json</code>.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="nd-06" data-list="new-dept">
+          <div class="item-content">
+            <label class="item-label" for="nd-06">Connection test passes <span class="item-tag required">required</span></label>
+            <div class="item-note">Admin → Department → Connection → Test Connection. Must return team list without errors.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="nd-07" data-list="new-dept">
+          <div class="item-content">
+            <label class="item-label" for="nd-07">PI config set correctly (piNamingPattern, sprintLabels) <span class="item-tag required">required</span></label>
+            <div class="item-note">Settings → PI Config for this department. Verify PIs appear in the top bar after saving.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="nd-08" data-list="new-dept">
+          <div class="item-content">
+            <label class="item-label" for="nd-08">Field mappings customised if non-standard work item types used <span class="item-tag optional">optional</span></label>
+            <div class="item-note">Settings → Field Mappings. Update <code>featureType</code>, <code>defectType</code>, and custom fields as needed.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="nd-09" data-list="new-dept">
+          <div class="item-content">
+            <label class="item-label" for="nd-09">Branding customised for this department <span class="item-tag optional">optional</span></label>
+            <div class="item-note">Settings → Branding. Set the department display name and optionally a logo or primary colour.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="nd-10" data-list="new-dept">
+          <div class="item-content">
+            <label class="item-label" for="nd-10">RAG thresholds adjusted for team's standards <span class="item-tag optional">optional</span></label>
+            <div class="item-note">Settings → RAG Thresholds. Different teams may have different quality expectations.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-header"><span class="group-icon">👥</span>Users & Access</div>
+        <div class="item">
+          <input type="checkbox" id="nd-11" data-list="new-dept">
+          <div class="item-content">
+            <label class="item-label" for="nd-11">Department admin account created and role assigned <span class="item-tag required">required</span></label>
+            <div class="item-note">Admin → Department → Members → Add member → set role to "admin".</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="nd-12" data-list="new-dept">
+          <div class="item-content">
+            <label class="item-label" for="nd-12">Team members added to department <span class="item-tag required">required</span></label>
+            <div class="item-note">Settings → Members (as dept admin) or Admin → Department → Members. Assign appropriate roles.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="nd-13" data-list="new-dept">
+          <div class="item-content">
+            <label class="item-label" for="nd-13">Visibility policies configured for this department <span class="item-tag optional">optional</span></label>
+            <div class="item-note">Settings → Policies. Hide sections that this team doesn't use (e.g. Test Coverage, Objectives).</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="nd-14" data-list="new-dept">
+          <div class="item-content">
+            <label class="item-label" for="nd-14">Dashboard URL shared with team members <span class="item-tag required">required</span></label>
+            <div class="item-note">URL format: <code>http://server:port/d/{dept-id}/</code>. Share login credentials or Azure AD SSO instructions.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="checklist-footer">
+      <div>
+        <div class="complete-badge" id="done-new-dept">✅ Department onboarding complete!</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn-print" onclick="window.print()">🖨 Print</button>
+        <button class="btn-clear" data-clear="new-dept">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 4. Production Go-Live ═════════════════════════════════════════════ -->
+  <div class="checklist-card" id="go-live">
+    <div class="checklist-header">
+      <div>
+        <div class="checklist-title">🚀 Production Go-Live</div>
+        <div class="checklist-meta">Before launching AV Dashboard to end users in production</div>
+      </div>
+      <div class="progress-ring-wrap">
+        <div class="progress-pill zero" id="pill-go-live">0 / 0</div>
+      </div>
+    </div>
+    <div class="checklist-progress"><div class="checklist-progress-bar" id="bar-go-live" style="width:0%"></div></div>
+    <div class="checklist-body">
+
+      <div class="group">
+        <div class="group-header"><span class="group-icon">🔒</span>Security</div>
+        <div class="item">
+          <input type="checkbox" id="gl-01" data-list="go-live">
+          <div class="item-content">
+            <label class="item-label" for="gl-01">Default super-admin password changed to a strong password <span class="item-tag required">required</span></label>
+            <div class="item-note">Settings → Profile or Admin → All Users. Use a password manager to generate a strong password (min 16 chars).</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="gl-02" data-list="go-live">
+          <div class="item-content">
+            <label class="item-label" for="gl-02"><code>sessionSecret</code> is a unique random string (not the default) <span class="item-tag required">required</span></label>
+            <div class="item-note">Check <code>config.json</code> → <code>app.sessionSecret</code>. Must be a long random string (32+ chars). Setup wizard auto-generates one.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="gl-03" data-list="go-live">
+          <div class="item-content">
+            <label class="item-label" for="gl-03">PAT stored only in config.json / dept config (not in code) <span class="item-tag required">required</span></label>
+            <div class="item-note"><code>config.json</code> and <code>data/</code> must be in <code>.gitignore</code>. Never commit them to version control.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="gl-04" data-list="go-live">
+          <div class="item-content">
+            <label class="item-label" for="gl-04">Server not directly internet-exposed (use reverse proxy or VPN) <span class="item-tag required">required</span></label>
+            <div class="item-note">Do not expose port 3000 to the internet. Use IIS/nginx as a reverse proxy with HTTPS, or restrict access to corporate VPN.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="gl-05" data-list="go-live">
+          <div class="item-content">
+            <label class="item-label" for="gl-05">User accounts created only for authorised personnel <span class="item-tag required">required</span></label>
+            <div class="item-note">Review Admin → All Users. Remove test accounts. Ensure no accounts share passwords.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-header"><span class="group-icon">🏗</span>Reliability</div>
+        <div class="item">
+          <input type="checkbox" id="gl-06" data-list="go-live">
+          <div class="item-content">
+            <label class="item-label" for="gl-06">Windows service installed and tested (auto-restart on reboot) <span class="item-tag required">required</span></label>
+            <div class="item-note">Run <code>.\scripts\deploy.ps1</code>. Verify service is running: <code>Get-Service AVDashboard</code>. Test by rebooting and checking the dashboard comes back up.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="gl-07" data-list="go-live">
+          <div class="item-content">
+            <label class="item-label" for="gl-07">Data backup plan in place for <code>data/</code> folder <span class="item-tag required">required</span></label>
+            <div class="item-note">Schedule regular backups of the <code>data/</code> folder (contains user accounts, dept configs, PI snapshots). A daily xcopy or robocopy to a shared drive is sufficient.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="gl-08" data-list="go-live">
+          <div class="item-content">
+            <label class="item-label" for="gl-08">Log rotation configured (service stdout/stderr logs) <span class="item-tag optional">optional</span></label>
+            <div class="item-note">NSSM writes logs to <code>server-out.log</code> and <code>server-err.log</code>. Set NSSM log rotation or schedule a cleanup task to prevent disk fill.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="gl-09" data-list="go-live">
+          <div class="item-content">
+            <label class="item-label" for="gl-09">PAT expiry date noted — calendar reminder set <span class="item-tag required">required</span></label>
+            <div class="item-note">Azure DevOps PATs expire. Set a calendar reminder 2 weeks before expiry to regenerate and update config.json.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="gl-10" data-list="go-live">
+          <div class="item-content">
+            <label class="item-label" for="gl-10">Auto-refresh interval appropriate for load (<code>refreshIntervalMinutes</code> ≥ 15) <span class="item-tag required">required</span></label>
+            <div class="item-note">Lower values = more ADO queries. For large programmes with 200+ features, use 30 minutes or higher.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-header"><span class="group-icon">🎯</span>Readiness</div>
+        <div class="item">
+          <input type="checkbox" id="gl-11" data-list="go-live">
+          <div class="item-content">
+            <label class="item-label" for="gl-11">All departments verified — data loads for all <span class="item-tag required">required</span></label>
+            <div class="item-note">Switch through each department via the top bar department switcher. Features and defects should load for each.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="gl-12" data-list="go-live">
+          <div class="item-content">
+            <label class="item-label" for="gl-12">Teams notification (Teams webhook) configured <span class="item-tag optional">optional</span></label>
+            <div class="item-note">Settings → Notifications. Add the Teams incoming webhook URL to receive daily digests and anomaly alerts.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="gl-13" data-list="go-live">
+          <div class="item-content">
+            <label class="item-label" for="gl-13">User documentation link shared (Help → User Manual) <span class="item-tag required">required</span></label>
+            <div class="item-note">Share <code>http://server:port/docs/user-manual.html</code> or the ? help button with all users. Brief users on the PI filter and team filter in the top bar.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="gl-14" data-list="go-live">
+          <div class="item-content">
+            <label class="item-label" for="gl-14">PI planning snapshot process agreed with team <span class="item-tag optional">optional</span></label>
+            <div class="item-note">Decide who is responsible for taking the PI planning snapshot (📸 Snap button) at PI planning completion. This enables predictability tracking.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="checklist-footer">
+      <div>
+        <div class="complete-badge" id="done-go-live">✅ Ready for go-live!</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn-print" onclick="window.print()">🖨 Print</button>
+        <button class="btn-clear" data-clear="go-live">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 5. Version Upgrade ════════════════════════════════════════════════ -->
+  <div class="checklist-card" id="upgrade">
+    <div class="checklist-header">
+      <div>
+        <div class="checklist-title">⬆️ Version Upgrade</div>
+        <div class="checklist-meta">Upgrading an existing AV Dashboard installation to a new version</div>
+      </div>
+      <div class="progress-ring-wrap">
+        <div class="progress-pill zero" id="pill-upgrade">0 / 0</div>
+      </div>
+    </div>
+    <div class="checklist-progress"><div class="checklist-progress-bar" id="bar-upgrade" style="width:0%"></div></div>
+    <div class="checklist-body">
+
+      <div class="group">
+        <div class="group-header"><span class="group-icon">💾</span>Pre-Upgrade</div>
+        <div class="item">
+          <input type="checkbox" id="up-01" data-list="upgrade">
+          <div class="item-content">
+            <label class="item-label" for="up-01">Full backup of <code>data/</code> folder taken <span class="item-tag required">required</span></label>
+            <div class="item-note">Copy <code>data/</code> to a safe location. This contains all user accounts, dept configs, and PI snapshots.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="up-02" data-list="upgrade">
+          <div class="item-content">
+            <label class="item-label" for="up-02">Current <code>config.json</code> backed up <span class="item-tag required">required</span></label>
+            <div class="item-note">Copy <code>config.json</code> to <code>config.json.bak</code>. New version may add config fields.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="up-03" data-list="upgrade">
+          <div class="item-content">
+            <label class="item-label" for="up-03">Release notes reviewed for breaking changes <span class="item-tag required">required</span></label>
+            <div class="item-note">Check the CHANGELOG or release notes for any config schema changes, renamed fields, or required migration steps.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="up-04" data-list="upgrade">
+          <div class="item-content">
+            <label class="item-label" for="up-04">Maintenance window planned (service will be briefly down) <span class="item-tag optional">optional</span></label>
+            <div class="item-note">Notify users before taking the service down for upgrade. Most upgrades take 2–5 minutes.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-header"><span class="group-icon">⬆</span>Upgrade Steps</div>
+        <div class="item">
+          <input type="checkbox" id="up-05" data-list="upgrade">
+          <div class="item-content">
+            <label class="item-label" for="up-05">Windows service stopped: <code>Stop-Service AVDashboard</code> <span class="item-tag required">required</span></label>
+            <div class="item-note">Or: <code>.\scripts\undeploy.ps1</code> if using NSSM. Wait for the process to fully exit.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="up-06" data-list="upgrade">
+          <div class="item-content">
+            <label class="item-label" for="up-06">New package extracted over existing deployment <span class="item-tag required">required</span></label>
+            <div class="item-note">Extract the new ZIP, overwriting <code>src/</code>, <code>server.js</code>, <code>client/dist/</code>, and <code>scripts/</code>. Do NOT overwrite <code>data/</code>, <code>config.json</code>.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="up-07" data-list="upgrade">
+          <div class="item-content">
+            <label class="item-label" for="up-07"><code>npm install --omit=dev</code> run in deployment folder <span class="item-tag required">required</span></label>
+            <div class="item-note">Updates production dependencies. Run from the deployment folder, not the source folder.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="up-08" data-list="upgrade">
+          <div class="item-content">
+            <label class="item-label" for="up-08">New config fields added to <code>config.json</code> (if any from release notes) <span class="item-tag migration">migration</span></label>
+            <div class="item-note">Compare your <code>config.json</code> with <code>config.sample.json</code> from the new version. Add any missing fields with their default values.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="up-09" data-list="upgrade">
+          <div class="item-content">
+            <label class="item-label" for="up-09">Service restarted: <code>Start-Service AVDashboard</code> <span class="item-tag required">required</span></label>
+            <div class="item-note">Or: <code>.\scripts\deploy.ps1 -SkipBuild</code> to re-register service. Check event log for startup errors.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-header"><span class="group-icon">✅</span>Post-Upgrade</div>
+        <div class="item">
+          <input type="checkbox" id="up-10" data-list="upgrade">
+          <div class="item-content">
+            <label class="item-label" for="up-10">Login works and user accounts preserved <span class="item-tag required">required</span></label>
+            <div class="item-note">Verify you can log in with existing accounts. User data in <code>data/users.json</code> should be intact.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="up-11" data-list="upgrade">
+          <div class="item-content">
+            <label class="item-label" for="up-11">All departments load data correctly <span class="item-tag required">required</span></label>
+            <div class="item-note">Switch through each department and verify Features/Defects sections load without errors.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="up-12" data-list="upgrade">
+          <div class="item-content">
+            <label class="item-label" for="up-12">Existing PI snapshots still accessible <span class="item-tag required">required</span></label>
+            <div class="item-note">Click 📸 Snap → browse existing snapshots. They should still be listed and loadable.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="up-13" data-list="upgrade">
+          <div class="item-content">
+            <label class="item-label" for="up-13">Backup files cleaned up after successful verification <span class="item-tag optional">optional</span></label>
+            <div class="item-note">Once everything is confirmed working, delete the backup copies of data/ and config.json.bak.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="checklist-footer">
+      <div>
+        <div class="complete-badge" id="done-upgrade">✅ Upgrade complete!</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn-print" onclick="window.print()">🖨 Print</button>
+        <button class="btn-clear" data-clear="upgrade">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 6. User Onboarding ════════════════════════════════════════════════ -->
+  <div class="checklist-card" id="user-onboard">
+    <div class="checklist-header">
+      <div>
+        <div class="checklist-title">👤 User Onboarding</div>
+        <div class="checklist-meta">For department admins welcoming new users to AV Dashboard</div>
+      </div>
+      <div class="progress-ring-wrap">
+        <div class="progress-pill zero" id="pill-user-onboard">0 / 0</div>
+      </div>
+    </div>
+    <div class="checklist-progress"><div class="checklist-progress-bar" id="bar-user-onboard" style="width:0%"></div></div>
+    <div class="checklist-body">
+
+      <div class="group">
+        <div class="group-header"><span class="group-icon">🔑</span>Account Setup</div>
+        <div class="item">
+          <input type="checkbox" id="uo-01" data-list="user-onboard">
+          <div class="item-content">
+            <label class="item-label" for="uo-01">User account created: Settings → Members → Add <span class="item-tag required">required</span></label>
+            <div class="item-note">Set email, display name, temporary password, and role (member / admin).</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="uo-02" data-list="user-onboard">
+          <div class="item-content">
+            <label class="item-label" for="uo-02">Credentials shared securely with user <span class="item-tag required">required</span></label>
+            <div class="item-note">Use a secure channel (e.g. encrypted email, Teams private message). Ask user to change password on first login.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="uo-03" data-list="user-onboard">
+          <div class="item-content">
+            <label class="item-label" for="uo-03">Dashboard URL shared with user <span class="item-tag required">required</span></label>
+            <div class="item-note">Include the direct department URL if multi-tenant: <code>http://server:port/d/{dept-id}/</code></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-header"><span class="group-icon">🎓</span>Orientation</div>
+        <div class="item">
+          <input type="checkbox" id="uo-04" data-list="user-onboard">
+          <div class="item-content">
+            <label class="item-label" for="uo-04">User walked through PI filter and team filter in top bar <span class="item-tag required">required</span></label>
+            <div class="item-note">These two filters are the most-used controls. Show how to select PIs and filter to a specific team.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="uo-05" data-list="user-onboard">
+          <div class="item-content">
+            <label class="item-label" for="uo-05">User aware of clickable TFS links on charts <span class="item-tag optional">optional</span></label>
+            <div class="item-note">Clicking chart bars/pie slices opens the corresponding filtered work item query in Azure DevOps. Very useful for drill-down.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="uo-06" data-list="user-onboard">
+          <div class="item-content">
+            <label class="item-label" for="uo-06">User aware of ? help button and user manual <span class="item-tag optional">optional</span></label>
+            <div class="item-note">The ? button in the top bar opens the in-app help panel with search. Full user manual at /docs/user-manual.html.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="uo-07" data-list="user-onboard">
+          <div class="item-content">
+            <label class="item-label" for="uo-07">User shown how to take and load PI snapshots (if relevant to their role) <span class="item-tag optional">optional</span></label>
+            <div class="item-note">📸 Snap button in top bar captures the current PI state. Predictability section uses this for tracking.</div>
+          </div>
+        </div>
+        <div class="item">
+          <input type="checkbox" id="uo-08" data-list="user-onboard">
+          <div class="item-content">
+            <label class="item-label" for="uo-08">User's role and access verified — no unexpected sections visible/hidden <span class="item-tag required">required</span></label>
+            <div class="item-note">Ask the user to confirm they can see the sections they need. If something is hidden, check Settings → Policies.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="checklist-footer">
+      <div>
+        <div class="complete-badge" id="done-user-onboard">✅ User onboarding complete!</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn-print" onclick="window.print()">🖨 Print</button>
+        <button class="btn-clear" data-clear="user-onboard">Clear</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+const STORAGE_KEY = 'av-checklists-v1';
+
+function loadState() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; }
+}
+function saveState(state) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+}
+
+function updateProgress(listId) {
+  const items = document.querySelectorAll(`input[type=checkbox][data-list="${listId}"]`);
+  const total = items.length;
+  const done  = Array.from(items).filter(i => i.checked).length;
+  const pct   = total ? Math.round(done / total * 100) : 0;
+
+  const bar   = document.getElementById('bar-' + listId);
+  const pill  = document.getElementById('pill-' + listId);
+  const badge = document.getElementById('done-' + listId);
+  const np    = document.getElementById('np-' + listId);
+
+  if (bar)  bar.style.width = pct + '%';
+  if (np)   np.style.width  = pct + '%';
+  if (pill) {
+    pill.textContent = `${done} / ${total}`;
+    pill.className   = 'progress-pill ' + (done === 0 ? 'zero' : done === total ? '' : 'partial');
+  }
+  if (badge) badge.classList.toggle('show', done === total && total > 0);
+}
+
+function init() {
+  const state = loadState();
+
+  document.querySelectorAll('input[type=checkbox][data-list]').forEach(cb => {
+    const listId = cb.dataset.list;
+    if (state[cb.id]) cb.checked = true;
+    const label = document.querySelector(`label[for="${cb.id}"]`);
+    if (label && cb.checked) label.classList.add('checked');
+
+    cb.addEventListener('change', () => {
+      const s = loadState();
+      if (cb.checked) { s[cb.id] = true; } else { delete s[cb.id]; }
+      saveState(s);
+      if (label) label.classList.toggle('checked', cb.checked);
+      updateProgress(listId);
+    });
+  });
+
+  // Clear buttons
+  document.querySelectorAll('[data-clear]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const listId = btn.dataset.clear;
+      const s = loadState();
+      document.querySelectorAll(`input[type=checkbox][data-list="${listId}"]`).forEach(cb => {
+        delete s[cb.id];
+        cb.checked = false;
+        const label = document.querySelector(`label[for="${cb.id}"]`);
+        if (label) label.classList.remove('checked');
+      });
+      saveState(s);
+      updateProgress(listId);
+    });
+  });
+
+  // Active nav highlight on scroll
+  const sections = document.querySelectorAll('.checklist-card');
+  const navItems = document.querySelectorAll('.sidenav .nav-item[href^="#"]');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navItems.forEach(n => n.classList.remove('active'));
+        const match = document.querySelector(`.sidenav .nav-item[href="#${entry.target.id}"]`);
+        if (match) match.classList.add('active');
+      }
+    });
+  }, { threshold: 0.3 });
+  sections.forEach(s => observer.observe(s));
+
+  // Initial progress for all lists
+  ['fresh', 'migration', 'new-dept', 'go-live', 'upgrade', 'user-onboard'].forEach(updateProgress);
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

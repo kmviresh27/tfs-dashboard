@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AV Dashboard – User Manual</title>
+<style>
+  /* App font */
+  :root{
+    /* === Filament Dark Mode — Blue Theme === */
+    --bg:#242424;--bg-card:#2B2B2B;--bg-card2:#363636;--bg-sidebar:#171717;
+    --text:#ffffff;--muted:#ADADAD;--disabled:rgba(255,255,255,.32);
+    --border:#454545;--border-sub:#3D3D3D;
+    --primary:#0072db;--primary-hov:#0061c2;--primary-act:#0052a3;
+    --primary-light:#1492ff;--primary-sub:#b8e0ff;--brand:#0b5ed7;
+    --success:#068443;--success-lt:#25938d;--warning:#fa7000;
+    --caution:#F5CC00;--danger:#eb3f3f;--info:#5260FF;
+    --purple:#858FFF;--orange:#ff7f0f;--teal:#21837c;
+    --radius:6px;--radius-lg:12px;--radius-pill:999px;
+    --shadow-sm:0 0 2px rgba(0,0,0,.32),0 4px 8px rgba(0,0,0,.64);
+    --shadow-lg:0 0 2px rgba(0,0,0,.32),0 16px 16px rgba(0,0,0,.16),0 24px 32px rgba(0,0,0,.32);
+    --motion-s:160ms;--motion-m:240ms;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Neue Frutiger One','Neue Frutiger World',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-size:14px;font-weight:350;line-height:20px;background:var(--bg);color:var(--text);display:flex;min-height:100vh;}
+  .sidebar{width:260px;background:var(--bg-sidebar);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 0;flex-shrink:0;box-shadow:var(--shadow-sm);}
+  .sidebar-brand{padding:0 20px 20px;border-bottom:1px solid var(--border);margin-bottom:16px;}
+  .sidebar-brand .logo{font-size:18px;font-weight:700;color:var(--success);}
+  .sidebar-brand .sub{font-size:11px;color:var(--muted);margin-top:2px;}
+  .sidebar-section{padding:8px 20px 4px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:600;}
+  .sidebar a{display:block;padding:7px 20px;font-size:13px;color:var(--muted);text-decoration:none;border-left:3px solid transparent;transition:all .15s;}
+  .sidebar a:hover{color:var(--success);background:rgba(63,185,80,.06);border-left-color:var(--success);}
+  .main{flex:1;padding:48px 56px;max-width:1100px;}
+  .doc-header{margin-bottom:48px;padding-bottom:32px;border-bottom:1px solid var(--border);}
+  .doc-header h1{font-size:32px;font-weight:700;margin-bottom:8px;}
+  .doc-header .tagline{font-size:16px;color:var(--muted);margin-bottom:20px;}
+  .meta-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  .meta-item{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 16px;box-shadow:var(--shadow-sm);}
+  .meta-item .label{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:4px;}
+  .meta-item .value{font-size:13px;font-weight:600;}
+  .section{margin-bottom:56px;}
+  .section-title{font-size:22px;font-weight:700;color:var(--success);padding-bottom:12px;border-bottom:1px solid var(--border);margin-bottom:24px;display:flex;align-items:center;gap:10px;}
+  h3{font-size:15px;font-weight:600;color:var(--text);margin:24px 0 12px;padding-left:12px;border-left:3px solid var(--success);}
+  h4{font-size:12px;font-weight:700;color:var(--muted);margin:16px 0 8px;text-transform:uppercase;letter-spacing:.8px;}
+  p{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:12px;}
+  /* Code block */
+  .code-block{background:#0d0d0d;border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 24px;margin:12px 0;overflow-x:auto;position:relative;box-shadow:var(--shadow-sm);}
+  .code-block .lang-tag{position:absolute;top:8px;right:12px;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;}
+  .code-block pre{font-family:'Consolas','Courier New',monospace;font-size:12px;line-height:1.8;color:#CDD9E5;white-space:pre-wrap;}
+  .kw{color:#F47067;}
+  .fn{color:#DCBDFB;}
+  .str{color:#96D0FF;}
+  .cmt{color:#768390;font-style:italic;}
+  .num{color:#6CB6FF;}
+  .prop{color:#8DDB8C;}
+  .op{color:#F69D50;}
+  /* Steps */
+  .step{display:flex;gap:16px;margin-bottom:20px;align-items:flex-start;}
+  .step-num{width:32px;height:32px;border-radius:50%;background:rgba(6,132,67,.15);border:2px solid var(--success);color:var(--success);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .step-content{flex:1;}
+  .step-content strong{display:block;color:var(--text);font-size:14px;margin-bottom:4px;}
+  .step-content p{font-size:13px;margin:0;}
+  /* File tree */
+  .tree{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 24px;font-family:'Consolas',monospace;font-size:13px;line-height:2;margin:12px 0;box-shadow:var(--shadow-sm);}
+  .tree .dir{color:var(--primary-light);font-weight:600;}
+  .tree .file{color:var(--text);}
+  .tree .comment{color:var(--muted);font-style:italic;}
+  /* Table */
+  table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0 20px;}
+  th{background:var(--bg-card2);color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  td:first-child{font-family:'Consolas',monospace;font-size:12px;color:var(--orange);}
+  /* Info boxes */
+  .info-box{background:rgba(6,132,67,.08);border:1px solid rgba(6,132,67,.2);border-radius:var(--radius-lg);padding:16px 20px;margin:16px 0;}
+  .info-box.warn{background:rgba(250,112,0,.08);border-color:rgba(250,112,0,.3);}
+  .info-box.danger{background:rgba(235,63,63,.08);border-color:rgba(235,63,63,.3);}
+  .info-box.blue{background:rgba(20,146,255,.08);border-color:rgba(20,146,255,.3);}
+  .info-box p{font-size:13px;margin:0;line-height:1.6;}
+  .info-box .title{font-size:12px;font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:.6px;}
+  .info-box .title{color:var(--success);}
+  .info-box.warn .title{color:var(--warning);}
+  .info-box.danger .title{color:var(--danger);}
+  .info-box.blue .title{color:var(--primary-light);}
+  code{font-family:'Consolas',monospace;background:var(--bg-card2);padding:2px 6px;border-radius:4px;font-size:12px;color:var(--orange);}
+  .pill{display:inline-block;padding:2px 8px;border-radius:var(--radius-pill);font-size:11px;font-weight:700;}
+  .pill-green{background:rgba(6,132,67,.15);color:var(--success);border:1px solid rgba(6,132,67,.3);}
+  .pill-blue{background:rgba(20,146,255,.15);color:var(--primary-light);border:1px solid rgba(20,146,255,.3);}
+  .pill-orange{background:rgba(255,127,15,.15);color:var(--orange);border:1px solid rgba(255,127,15,.3);}
+  .sidebar-brand .logo,.section-title{color:var(--purple);}
+  h3{border-left-color:var(--purple);}
+  .sidebar a:hover{color:var(--purple);background:rgba(133,143,255,.08);border-left-color:var(--purple);}
+  ul,ol{margin:0 0 16px 22px;color:var(--muted);}
+  li{margin-bottom:8px;line-height:1.7;}
+  .manual-table td:first-child{font-family:inherit;font-size:13px;color:var(--text);}
+  .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:16px 0;}
+  .panel{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;box-shadow:var(--shadow-sm);}
+  .panel h4{margin-top:0;padding-left:0;color:var(--primary-light);}
+  .screenshot-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:16px 0;}
+  .screenshot-box{background:#303030;border:1px dashed #6b6b6b;border-radius:var(--radius-lg);padding:28px 16px;text-align:center;color:var(--muted);min-height:170px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);}
+  .screenshot-box .icon{font-size:28px;margin-bottom:10px;opacity:.75;}
+  .screenshot-box .label{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;}
+  .screenshot-box .hint{font-size:11px;color:var(--muted);}
+  .caption{font-size:12px;color:var(--muted);margin-top:8px;}
+  .link-list a{color:var(--primary-light);text-decoration:none;}
+  .link-list a:hover{text-decoration:underline;}
+  @media (max-width:1100px){body{flex-direction:column;}.sidebar{width:100%;height:auto;position:relative;}.main{max-width:none;padding:32px 24px;}.meta-grid,.grid-2,.screenshot-grid{grid-template-columns:1fr 1fr;}}
+  @media (max-width:760px){.meta-grid,.grid-2,.screenshot-grid{grid-template-columns:1fr;}}
+  @media print{.sidebar{display:none;}.main{padding:24px;}}
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">📖 User Manual</div>
+    <div class="sub">AV Dashboard · v2.2</div>
+  </div>
+  <div class="sidebar-section">Basics</div>
+  <a href="#getting-started">1. Getting Started</a>
+  <a href="#navigation">2. Navigation</a>
+  <div class="sidebar-section">Dashboard Views</div>
+  <a href="#executive">3. Executive</a>
+  <a href="#features">4. Features</a>
+  <a href="#defects">5. Defects</a>
+  <a href="#teams">6. Teams</a>
+  <a href="#sprint-trend">7. Sprint Trend</a>
+  <a href="#velocity">8. Velocity</a>
+  <a href="#test-coverage">9. Test Coverage</a>
+  <div class="sidebar-section">Planning &amp; Analysis</div>
+  <a href="#objectives">10. Objectives Planning</a>
+  <a href="#roadmap">11. Roadmap</a>
+  <a href="#dependencies">12. Dependencies</a>
+  <a href="#risks">13. Risks</a>
+  <a href="#release-health">14. Release Health</a>
+  <a href="#pi-delivery">15. PI Delivery</a>
+  <a href="#scope-change">16. Scope Change</a>
+  <a href="#insights">17. Insights</a>
+  <a href="#snapshots">18. Snapshots</a>
+  <a href="#tfs-links">19. TFS Links</a>
+  <div class="sidebar-section">Administration</div>
+  <a href="#settings">20. Settings</a>
+  <a href="#troubleshooting">21. Troubleshooting</a>
+</nav>
+
+<main class="main">
+  <div class="doc-header">
+    <h1>AV Dashboard User Manual</h1>
+    <div class="tagline">Step-by-step operating guide for the TFS Live Monitoring Dashboard used by the your engineering programme.</div>
+    <div class="meta-grid">
+      <div class="meta-item"><div class="label">Application</div><div class="value">AV Dashboard</div></div>
+      <div class="meta-item"><div class="label">URL</div><div class="value">http://localhost:3000</div></div>
+      <div class="meta-item"><div class="label">Audience</div><div class="value">Exec · RTE · PM · SM · Team Leads</div></div>
+      <div class="meta-item"><div class="label">Theme</div><div class="value">AV Dashboard Dark</div></div>
+    </div>
+  </div>
+
+  <section class="section" id="getting-started">
+    <h2 class="section-title">🚀 1. Getting Started</h2>
+    <p>AV Dashboard is a React + Node.js web application that connects to Team Foundation Server (TFS / Azure DevOps) and presents live PI delivery data for the your engineering programme. It is designed for daily operational use: monitoring feature flow, delivery predictability, quality, risks, objectives, and release readiness from one dashboard.</p>
+
+    <table class="manual-table">
+      <thead><tr><th>Item</th><th>Recommendation</th><th>Why it matters</th></tr></thead>
+      <tbody>
+        <tr><td>Browser</td><td>Google Chrome or Microsoft Edge (latest stable)</td><td>Best compatibility for large charts, sticky navigation, modal dialogs, and fullscreen cards.</td></tr>
+        <tr><td>Server runtime</td><td>Node.js 18+</td><td>The local dashboard server runs on Node.js and serves both API responses and the React application.</td></tr>
+        <tr><td>Application URL</td><td><code>http://localhost:3000</code></td><td>This is the default address for the locally hosted dashboard.</td></tr>
+        <tr><td>Data source</td><td>TFS / Azure DevOps</td><td>All delivery metrics are derived from live work item data, saved queries, classification nodes, and snapshot files.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Open the dashboard</h3>
+    <div class="step"><div class="step-num">1</div><div class="step-content"><strong>Open Chrome or Edge</strong><p>Use a modern Chromium-based browser to ensure all dashboard controls render correctly.</p></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><strong>Navigate to the local dashboard URL</strong><div class="code-block"><span class="lang-tag">url</span><pre>http://localhost:3000</pre></div><p>If the server is running, the dashboard shell loads immediately and begins requesting live programme data.</p></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-content"><strong>Wait for the first refresh cycle</strong><p>The initial load can take a few moments while the server reads configuration, connects to TFS, and resolves the available PI list, teams, and dashboard payloads.</p></div></div>
+
+    <h3>Complete first-time setup</h3>
+    <div class="step"><div class="step-num">1</div><div class="step-content"><strong>Open the Settings page</strong><p>Select <strong>Settings</strong> from the top bar or the dashboard navigation.</p></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><strong>Enter your TFS base information</strong><p>Provide the TFS base URL, a valid Personal Access Token (PAT), and the programme area path used to scope work items.</p></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-content"><strong>Save the configuration</strong><p>After saving, use the refresh action to reload live data with the new connection settings.</p></div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-content"><strong>Verify the top bar filters</strong><p>Confirm that PI options, team filters, and role views appear. If they do, the dashboard is successfully reading configuration and base data.</p></div></div>
+
+    <div class="info-box danger">
+      <div class="title">🔐 PAT Security</div>
+      <p>Your PAT is sensitive. Store it only in the dashboard settings/configuration, never in screenshots, emails, chat messages, or shared documents.</p>
+    </div>
+
+    <h3>Understand the dashboard shell</h3>
+    <div class="grid-2">
+      <div class="panel">
+        <h4>Dark theme</h4>
+        <p>The application uses a dark dark theme optimized for wallboards, meetings, and day-to-day monitoring. Strong color contrast makes RAG statuses and chart trends easy to scan quickly.</p>
+      </div>
+      <div class="panel">
+        <h4>Navigation bar</h4>
+        <p>The top navigation bar is the main control surface for PI selection, team filtering, role view switching, snapshot selection, refresh, and settings access.</p>
+      </div>
+    </div>
+
+    <div class="screenshot-grid">
+      <div class="screenshot-box"><div class="icon">📷</div><div class="label">Dashboard Home / Top Navigation</div><div class="hint">Screenshot placeholder</div></div>
+      <div class="screenshot-box"><div class="icon">⚙️</div><div class="label">First-Time Settings Screen</div><div class="hint">Screenshot placeholder</div></div>
+    </div>
+  </section>
+
+  <section class="section" id="navigation">
+    <h2 class="section-title">🧭 2. Navigation</h2>
+    <p>The dashboard is filter-driven. Most views update immediately when you change the selected PI, team, role, or snapshot. Understanding the top navigation controls is the fastest way to become productive.</p>
+
+    <table class="manual-table">
+      <thead><tr><th>Top bar control</th><th>Purpose</th><th>How to use it</th></tr></thead>
+      <tbody>
+        <tr><td>PI selector</td><td>Chooses the PI or PIs that drive most section data.</td><td>Select one or multiple PIs to compare or aggregate delivery data across a planning interval.</td></tr>
+        <tr><td>Team filter</td><td>Narrows charts and tables to a single team area path.</td><td>Leave on <em>All Teams</em> for programme view, or choose a specific team for focused analysis.</td></tr>
+        <tr><td>Role view selector</td><td>Shows the section set most relevant to the chosen audience.</td><td>Switch between All, Exec, RTE, PM, and SM depending on the meeting or persona.</td></tr>
+        <tr><td>Refresh</td><td>Reloads live data from TFS.</td><td>Use after configuration changes, before review meetings, or when you suspect stale data.</td></tr>
+        <tr><td>IFU (User Manual)</td><td>Opens this user manual in a new tab.</td><td>Click the <strong>IFU</strong> text button in the top bar to access documentation at any time without leaving the dashboard.</td></tr>
+        <tr><td>Settings</td><td>Opens dashboard configuration.</td><td>Update TFS, field mapping, thresholds, notifications, branding, and GitHub repo settings.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Select PI values</h3>
+    <div class="step"><div class="step-num">1</div><div class="step-content"><strong>Open the PI selector</strong><p>Click the PI filter in the top bar. A searchable list of available PI values appears.</p></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><strong>Select one or more PIs</strong><p>The selector supports multi-select. This is useful for comparing PIs, reviewing the last four PIs, or combining multiple intervals for trend analysis.</p></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-content"><strong>Interpret the PI name correctly</strong><div class="code-block"><span class="lang-tag">example</span><pre>26-PI1 = Year 26, Programme Increment 1, aligned to Q1</pre></div><p>Use the selected PI set as the primary context for Executive, Features, Defects, Teams, and most planning views.</p></div></div>
+
+    <div class="info-box blue">
+      <div class="title">ℹ Multi-PI behaviour</div>
+      <p>Some widgets aggregate all selected PIs, while selected trend widgets intentionally ignore current selection and always use a fixed historical range, such as the last four PIs for cycle-time distribution.</p>
+    </div>
+
+    <h3>Filter by team</h3>
+    <p>The team filter is usually populated from TFS area paths. Choose <strong>All Teams</strong> to view programme-wide totals or select a specific team to narrow every compatible card, table, and chart. If a widget does not support team filtering, it remains programme scoped and the manual usually calls this out.</p>
+
+    <h3>Role views</h3>
+    <table class="manual-table">
+      <thead><tr><th>Role</th><th>Primary use</th><th>Typical sections shown</th></tr></thead>
+      <tbody>
+        <tr><td>All</td><td>Full dashboard access</td><td>All sections including Executive, Objectives, Features, Defects, Teams, PI Board, Sprint, Velocity, PI Delivery, Release Health, Test Coverage, Roadmap, Risks, Compare, Scope Change, and Insights.</td></tr>
+        <tr><td>Exec</td><td>Senior programme review</td><td>Executive, Objectives, Features, Defects, Roadmap, Risks, Compare PI, Scope Change, Insights.</td></tr>
+        <tr><td>RTE</td><td>Programme and delivery orchestration</td><td>Executive, Objectives, Features, Defects, Teams, PI Board, Velocity, PI Delivery, Release Health, Risks, Compare PI, Scope Change, Insights.</td></tr>
+        <tr><td>PM</td><td>Product and planning analysis</td><td>Objectives, Features, Defects, PI Board, Sprint Health, Velocity, PI Delivery, Release Health, Risks, Roadmap, Scope Change, Insights.</td></tr>
+        <tr><td>SM</td><td>Execution and team-level monitoring</td><td>Features, Defects, Teams, PI Board, Sprint Health, Velocity, Test Coverage.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Section tabs, slideshow mode, and card zoom</h3>
+    <table class="manual-table">
+      <thead><tr><th>Feature</th><th>What it does</th><th>User guidance</th></tr></thead>
+      <tbody>
+        <tr><td>Section tabs</td><td>Switch subviews within a section, such as Features → Overview / PI Checks / Predictability / Dependencies.</td><td>Use tabs to move from summary-level KPIs into more specialized analytical views without leaving the section.</td></tr>
+        <tr><td>Slideshow mode</td><td>Automatically pages dashboard content every 10 seconds.</td><td>Use for monitor mode or meeting playback. The app moves through section pages automatically.</td></tr>
+        <tr><td>Card zoom</td><td>Opens an individual card or chart in fullscreen.</td><td>Best for readouts in meetings, large wallboards, or when analyzing dense visualizations.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="info-box">
+      <div class="title">💡 Presentation tip</div>
+      <p>Before using slideshow mode, set the intended PI, team, role view, and snapshot first. Slideshow respects the current dashboard state and simply rotates the visible pages.</p>
+    </div>
+
+    <div class="screenshot-grid">
+      <div class="screenshot-box"><div class="icon">🧭</div><div class="label">Top Bar Controls and Filters</div><div class="hint">Screenshot placeholder</div></div>
+      <div class="screenshot-box"><div class="icon">🖥️</div><div class="label">Slideshow / Fullscreen Card View</div><div class="hint">Screenshot placeholder</div></div>
+    </div>
+  </section>
+
+  <section class="section" id="executive">
+    <h2 class="section-title">📋 3. Executive Section</h2>
+    <p>The Executive section is the programme summary page. It is designed for fast health assessment and is typically the first stop for weekly operational reviews, leadership updates, and PI health discussions.</p>
+
+    <table class="manual-table">
+      <thead><tr><th>Card</th><th>What it shows</th><th>How to interpret it</th></tr></thead>
+      <tbody>
+        <tr><td>Programme Health Score</td><td>0–100 arc gauge with green, amber, and red zones.</td><td>Green is greater than 70, amber is 40–70, and red is below 40. Treat it as a composite signal for delivery health, not a standalone verdict.</td></tr>
+        <tr><td>PI Programme Score</td><td>Sprint progress bars for S1, S2, S3, and IP with effort points and feature counts.</td><td>Use it to see whether delivery is progressing evenly through the PI or slipping toward later sprints/IP.</td></tr>
+        <tr><td>Committed vs Delivered</td><td>Compares features committed during planning versus features actually delivered.</td><td>If delivered is materially below committed, investigate predictability, scope movement, blocked dependencies, or quality issues.</td></tr>
+        <tr><td>Team Scorecard</td><td>Per-team health metrics in one summary card.</td><td>Use it to identify outliers quickly and decide which teams require deeper review.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>How to read the score</h3>
+    <ul>
+      <li><strong>Green (&gt;70):</strong> Delivery is broadly healthy and within expected tolerance.</li>
+      <li><strong>Amber (40–70):</strong> Review scope, WIP, defects, or PI checks because the programme is under some pressure.</li>
+      <li><strong>Red (&lt;40):</strong> Immediate attention is required. Drill into Features, Defects, Risks, and Dependencies to isolate the cause.</li>
+    </ul>
+
+    <div class="info-box warn">
+      <div class="title">⚠ Interpretation guidance</div>
+      <p>A low score should always be cross-checked against the underlying cards. For example, a weak committed-vs-delivered signal plus rising defect aging usually points to execution strain rather than a data issue.</p>
+    </div>
+
+    <div class="screenshot-grid">
+      <div class="screenshot-box"><div class="icon">📊</div><div class="label">Executive Programme Health Overview</div><div class="hint">Screenshot placeholder</div></div>
+      <div class="screenshot-box"><div class="icon">🏁</div><div class="label">PI Programme Score and Team Scorecard</div><div class="hint">Screenshot placeholder</div></div>
+    </div>
+  </section>
+
+  <section class="section" id="features">
+    <h2 class="section-title">🚀 4. Features Section</h2>
+    <p>The Features section is the core delivery workspace. It combines high-level KPIs, flow analytics, saved PI checks, predictability against a planning snapshot, and cross-team dependency visibility.</p>
+
+    <table class="manual-table">
+      <thead><tr><th>Tab</th><th>Main purpose</th><th>Best used for</th></tr></thead>
+      <tbody>
+        <tr><td>Overview</td><td>Live feature delivery and flow metrics.</td><td>Weekly delivery reviews, team follow-up, and programme execution monitoring.</td></tr>
+        <tr><td>PI Checks</td><td>Saved query compliance checks against PI readiness and hygiene.</td><td>Governance, planning quality, and backlog hygiene reviews.</td></tr>
+        <tr><td>Predictability</td><td>Compares live delivery against a PI Plan Data snapshot.</td><td>Assessing committed vs stretch completion and team predictability.</td></tr>
+        <tr><td>Dependencies</td><td>Shows cross-team feature dependencies.</td><td>Finding blocked delivery chains and unresolved hand-offs.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Overview tab</h3>
+    <table class="manual-table">
+      <thead><tr><th>Widget</th><th>Description</th><th>Typical action</th></tr></thead>
+      <tbody>
+        <tr><td>Cycle Time Distribution (last 4 PIs)</td><td>Histogram of feature cycle times over the last four PIs with a Gaussian overlay and KPI strip (avg / median / p25 / p75 / σ). <strong>Always shows the last 4 PIs — independent of the PI selector.</strong></td><td>Use to understand delivery pace across recent programme history. A narrow distribution centred below 30 days indicates a healthy flow pattern.</td></tr>
+        <tr><td>Total Features / Features Done / Done Rate %</td><td>Core outcome KPIs for the selected PI scope.</td><td>Use these first to establish whether the PI is trending toward completion.</td></tr>
+        <tr><td>WIP count / Stale Features</td><td>Shows active work volume and items not moving.</td><td>High WIP or stale counts often indicate overcommitment, dependency wait states, or ownership gaps.</td></tr>
+        <tr><td>Feature Lifecycle Funnel</td><td>Horizontal bar chart of all states: Forecasted → New → Approved → Activated → Done → Removed.</td><td>Click any bar to open the matching TFS query and inspect underlying work items.</td></tr>
+        <tr><td>Team Summary</td><td>Per-team delivery chart with <strong>Count</strong> / <strong>Points (man-days)</strong> toggle (defaults to Points). In Points view: stacked bars show Done + In Progress + Remaining effort (total = Planned), paired with a Dev Capacity bar from TFS — both in <strong>man-days</strong> (1 day = 6 hours by default, configurable in Settings).</td><td>Use Count for workload volume. Use Points to compare how much effort each team has planned against their available development capacity for the PI. A team whose Planned stack exceeds Capacity is over-committed.</td></tr>
+        <tr><td>Cycle Time Summary</td><td>Average, minimum, and maximum days from Created → Done.</td><td>Use this to judge delivery efficiency and identify unusually long-lived items.</td></tr>
+        <tr><td>Feature Age Distribution</td><td>Age of non-Done features in their current state.</td><td>Useful for spotting items stuck in Forecasted, Approved, or Activated for too long.</td></tr>
+        <tr><td>Cross-Team Dependencies</td><td>Delivery links spanning multiple teams.</td><td>Use it to identify blockers before they turn into slipped features.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="info-box blue">
+      <div class="title">ℹ Man-days unit in Team Summary</div>
+      <p>The <strong>Effort</strong> field on a Feature work item in TFS represents man-days. Dev Capacity hours are divided by the <em>Hours per Man-Day</em> setting (default: 6) to produce the same unit. This means the Planned stack and the Capacity bar are directly comparable — both measure how many days of work are in scope versus available.</p>
+    </div>
+
+    <div class="info-box blue">
+      <div class="title">ℹ Click-through behaviour</div>
+      <p>Most Overview charts are interactive. Clicking a bar, segment, or ID takes you directly to a filtered TFS result so you can move from summary to action without rebuilding the query manually.</p>
+    </div>
+
+    <h3>PI Checks tab</h3>
+    <p>The PI Checks tab runs 17 checks based on TFS saved queries. Each check returns a Red/Amber/Green status and the number of matching items.</p>
+    <table class="manual-table">
+      <thead><tr><th>Status</th><th>Meaning</th><th>User action</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pill pill-green">Green</span></td><td>No significant issue detected for the saved query.</td><td>Monitor only; no immediate intervention needed.</td></tr>
+        <tr><td><span class="pill pill-orange">Amber</span></td><td>Some issues exist and should be reviewed.</td><td>Open the check details, inspect the item list, and assign clean-up actions.</td></tr>
+        <tr><td><span class="pill" style="background:rgba(235,63,63,.15);color:var(--danger);border:1px solid rgba(235,63,63,.3);">Red</span></td><td>High-priority data or planning hygiene issue.</td><td>Open the TFS link immediately and address the affected items before the next planning checkpoint.</td></tr>
+      </tbody>
+    </table>
+    <ol>
+      <li>Open <strong>Features → PI Checks</strong>.</li>
+      <li>Review the RAG state and issue count for each check.</li>
+      <li>Click the check name to view the detailed item list.</li>
+      <li>Use the direct TFS link to jump to the source query.</li>
+    </ol>
+
+    <h3>Predictability tab</h3>
+    <p>This tab requires an active <strong>PI Plan Data (Snapshot)</strong> selection in the top bar. It compares planned scope with current live delivery state.</p>
+    <div class="step"><div class="step-num">1</div><div class="step-content"><strong>Select a snapshot in the top bar</strong><p>If no snapshot is selected, the Predictability tab cannot compare plan versus live state.</p></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><strong>Open Features → Predictability</strong><p>Review the planned completion percentage, stretch completion percentage, and team-level predictability chart.</p></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-content"><strong>Read the comparison table</strong><p>The table shows snapshot state versus live state so you can see which features delivered, slipped, or changed classification after planning.</p></div></div>
+
+    <div class="info-box warn">
+      <div class="title">⚠ Snapshot prerequisite</div>
+      <p>If the Predictability tab looks empty, first confirm that a snapshot exists for the PI and that it is selected in the <strong>📋 PI Plan Data</strong> control.</p>
+    </div>
+
+    <div class="screenshot-grid">
+      <div class="screenshot-box"><div class="icon">🚀</div><div class="label">Features Overview Dashboard</div><div class="hint">Screenshot placeholder</div></div>
+      <div class="screenshot-box"><div class="icon">📋</div><div class="label">PI Checks and Predictability Tabs</div><div class="hint">Screenshot placeholder</div></div>
+    </div>
+  </section>
+
+  <section class="section" id="defects">
+    <h2 class="section-title">🐛 5. Defects Section</h2>
+    <p>The Defects section focuses on quality performance across the selected PI scope. It helps users understand defect volume, ownership, aging, trend direction, and escape risk.</p>
+
+    <table class="manual-table">
+      <thead><tr><th>Widget</th><th>What it answers</th><th>How to use it</th></tr></thead>
+      <tbody>
+        <tr><td>State breakdown bar chart</td><td>How many defects are New, Accepted, Planned, Resolved, Closed, or Removed?</td><td>Use it to judge backlog health and whether work is accumulating in unresolved states.</td></tr>
+        <tr><td>Team breakdown stacked bar</td><td>Which teams own the current defect load?</td><td>Compare teams and detect where one team carries an unusually high share of quality debt.</td></tr>
+        <tr><td>Defect aging</td><td>How old are unresolved defects?</td><td>Long aging signals execution risk, prioritization issues, or missing ownership.</td></tr>
+        <tr><td>Injection by sprint</td><td>When were defects introduced across the PI timeline?</td><td>Look for spikes tied to releases, integration events, or late feature activation.</td></tr>
+        <tr><td>SLA breach tracking</td><td>Which defects exceeded target resolution windows?</td><td>Use for escalation and operational quality management.</td></tr>
+        <tr><td>Quarterly trends</td><td>Raised versus closed over time.</td><td>Confirms whether the programme is burning down quality debt or accumulating it.</td></tr>
+        <tr><td>Field defects</td><td>Production/field issues grouped by project.</td><td>Use in release and customer-impact discussions.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="info-box">
+      <div class="title">💡 Quality review pattern</div>
+      <p>Start with state breakdown, then move to aging and SLA breach widgets. If aging is rising while resolve rate is flat, inspect team breakdown and field defects next.</p>
+    </div>
+
+    <div class="screenshot-grid">
+      <div class="screenshot-box"><div class="icon">🐞</div><div class="label">Defect Overview and Team Breakdown</div><div class="hint">Screenshot placeholder</div></div>
+      <div class="screenshot-box"><div class="icon">📉</div><div class="label">Aging, SLA, and Quarterly Trends</div><div class="hint">Screenshot placeholder</div></div>
+    </div>
+  </section>
+
+  <section class="section" id="teams">
+    <h2 class="section-title">👥 6. Teams Section</h2>
+    <p>The Teams section organizes feature and defect information by team so you can quickly move from programme-level concern to team-level ownership.</p>
+
+    <table class="manual-table">
+      <thead><tr><th>Element</th><th>Description</th><th>Why it matters</th></tr></thead>
+      <tbody>
+        <tr><td>Per-team feature charts</td><td>Shows delivery state and throughput for each team.</td><td>Helps identify which teams are moving work to Done and which are carrying high WIP.</td></tr>
+        <tr><td>Per-team defect charts</td><td>Displays quality load by team.</td><td>Useful for balancing delivery pressure against defect pressure.</td></tr>
+        <tr><td>Team cards</td><td>Quick summary blocks with direct TFS links.</td><td>Lets you jump from summary to the team’s actual TFS feature or defect list.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>How team area paths work</h3>
+    <ol>
+      <li>The dashboard discovers teams from configured TFS area path roots.</li>
+      <li>Each team filter option maps back to an Area Path or branch of Area Paths in TFS.</li>
+      <li>When a team is selected, compatible widgets rebuild queries using that team path.</li>
+      <li>If a team is missing or the filter behaves unexpectedly, review the <code>teamRootPath</code> configuration in Settings.</li>
+    </ol>
+  </section>
+
+  <section class="section" id="sprint-trend">
+    <h2 class="section-title">📈 7. Sprint Trend Section</h2>
+    <p>The Sprint Trend section shows whether sprint-level execution is improving or degrading over the course of a PI.</p>
+
+    <table class="manual-table">
+      <thead><tr><th>Chart</th><th>Purpose</th><th>Interpretation tip</th></tr></thead>
+      <tbody>
+        <tr><td>Per-sprint feature done rate</td><td>Measures the percentage of planned or active feature work completed each sprint.</td><td>Compare sprints to spot late delivery concentration or weak early execution.</td></tr>
+        <tr><td>Per-sprint defect resolve rate</td><td>Tracks how effectively quality debt is resolved sprint by sprint.</td><td>If resolve rate drops while injection rises, expect backlog growth and release pressure.</td></tr>
+        <tr><td>Burndown chart</td><td>Shows remaining work across the sprint timeline.</td><td>A flat or rising burndown line usually indicates blocked work, scope addition, or weak execution.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="section" id="velocity">
+    <h2 class="section-title">⚡ 8. Velocity Section</h2>
+    <p>Velocity helps the programme compare planning intent with actual delivery pace. It is especially useful when validating commitments for future PIs.</p>
+
+    <table class="manual-table">
+      <thead><tr><th>View</th><th>What it shows</th><th>How to read it</th></tr></thead>
+      <tbody>
+        <tr><td>Feature velocity by sprint</td><td>Delivered feature count or effort per sprint.</td><td>Look for consistency. High volatility suggests uneven flow or shifting priorities.</td></tr>
+        <tr><td>Feature velocity by PI</td><td>Compares output between PIs.</td><td>Use for trend discussions and capacity planning.</td></tr>
+        <tr><td>Story point velocity</td><td>Planned versus completed story points.</td><td>Useful when features alone hide differences in size or effort.</td></tr>
+        <tr><td>Feature cycle time</td><td>How long features take to move from creation to completion.</td><td>Pair this with throughput; fast cycle time with weak throughput may still indicate under-commitment.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="info-box blue">
+      <div class="title">ℹ Features vs points</div>
+      <p>Use feature counts for scope volume and story points for effort load. A PI can close fewer features than another PI while still delivering more total effort.</p>
+    </div>
+  </section>
+
+  <section class="section" id="test-coverage">
+    <h2 class="section-title">🧪 9. Test Coverage Section</h2>
+    <p>The Test Coverage section links delivery progress with validation readiness. It helps programme and team leads judge whether features are backed by enough automated and manual test evidence.</p>
+
+    <table class="manual-table">
+      <thead><tr><th>Metric</th><th>Description</th><th>Why it matters</th></tr></thead>
+      <tbody>
+        <tr><td>Total test cases</td><td>Total linked or discovered test cases in scope.</td><td>Establishes the size of the validation baseline.</td></tr>
+        <tr><td>Automation %</td><td>Split across Automated, Not Automated, and Planned.</td><td>Shows maturity of the validation strategy and regression readiness.</td></tr>
+        <tr><td>Feature coverage %</td><td>Percentage of features with linked test cases.</td><td>Low coverage can indicate delivery risk even when feature completion looks healthy.</td></tr>
+        <tr><td>Test run summary</td><td>Pass-rate view of available test runs.</td><td>Use it to distinguish “test cases exist” from “tests are actually passing.”</td></tr>
+        <tr><td>GitHub CI matrix</td><td>Optional build/test visibility for configured repositories.</td><td>Appears only when GitHub repos are configured in Settings.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="section" id="objectives">
+    <h2 class="section-title">🎯 10. Objectives Planning Section</h2>
+    <p>PI Objectives express the business outcomes the programme is trying to achieve in the PI. This section connects objectives to actual feature delivery so stakeholders can see whether the intended outcomes are realistically supported.</p>
+
+    <table class="manual-table">
+      <thead><tr><th>Item</th><th>Behaviour</th><th>Usage</th></tr></thead>
+      <tbody>
+        <tr><td>Committed vs Stretch objectives</td><td>Stretch is detected from title markers such as <code>(Stretch)</code> or <code>[Stretch]</code>.</td><td>Use this to separate must-deliver outcomes from aspirational scope.</td></tr>
+        <tr><td>KPIs</td><td>Total, Committed, Stretch, Done, and Linked Features.</td><td>Quickly shows whether the objective set is balanced and sufficiently linked to implementation work.</td></tr>
+        <tr><td>Expand All / Collapse All</td><td>Shows or hides all objective details.</td><td>Helpful in meetings where you need either summary-only view or full drill-down.</td></tr>
+        <tr><td>Objective detail rows</td><td>Lists linked features with state, team, and effort.</td><td>Use to verify that each objective has enough delivery backing.</td></tr>
+        <tr><td>Business Value</td><td>Displays the objective’s assigned business value.</td><td>Helps prioritize discussion when many objectives are in flight.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>REQ_ / COM_ deviation logic</h3>
+    <table class="manual-table">
+      <thead><tr><th>Tag pattern</th><th>Meaning</th><th>Why a warning appears</th></tr></thead>
+      <tbody>
+        <tr><td><code>REQ_TeamName</code></td><td>The team requested the feature.</td><td>A mismatch means requesting and committing teams are not aligned in the expected way.</td></tr>
+        <tr><td><code>COM_TeamName</code></td><td>The team committed to deliver the feature.</td><td>Both tags should be present per team when the delivery agreement is complete.</td></tr>
+        <tr><td>⚠ mismatch icon</td><td>Signals a REQ_/COM_ deviation.</td><td>Use it as a planning hygiene check during PI planning or scope changes.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Use the team filter inside objective review</h3>
+    <ol>
+      <li>Select a team from the global team filter.</li>
+      <li>Open Objectives Planning.</li>
+      <li>Expand the objective rows you care about.</li>
+      <li>The feature list under each objective narrows to the selected team, making ownership review faster.</li>
+    </ol>
+  </section>
+
+  <section class="section" id="roadmap">
+    <h2 class="section-title">🗺 11. Roadmap Section</h2>
+    <p>The Roadmap section visualizes feature delivery by team and sprint over time. It is ideal for release sequencing, PI planning follow-up, and cross-team scheduling conversations.</p>
+
+    <table class="manual-table">
+      <thead><tr><th>Roadmap element</th><th>How to read it</th></tr></thead>
+      <tbody>
+        <tr><td>Rows</td><td>Typically represent teams, feature groups, or roadmap tracks.</td></tr>
+        <tr><td>Columns</td><td>Represent time buckets such as sprints or PI periods.</td></tr>
+        <tr><td>Colored items</td><td>Show where a feature is planned, active, or expected to land.</td></tr>
+        <tr><td>Gaps or crowding</td><td>May indicate idle periods, overload, or unrealistic sequencing.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>How to read the roadmap</h3>
+    <ol>
+      <li>Start with the left-hand row label to identify the team or workstream.</li>
+      <li>Move across the timeline from early sprint columns to later sprint columns.</li>
+      <li>Check whether critical features are clustered too late in the PI or overlap with many other items from the same team.</li>
+      <li>Use the roadmap together with Dependencies and Risks to confirm the sequencing is achievable, not just visually planned.</li>
+    </ol>
+  </section>
+
+  <section class="section" id="dependencies">
+    <h2 class="section-title">🔗 12. Dependencies Section</h2>
+    <p>Dependencies expose feature relationships that cross team boundaries. This view is valuable during programme syncs because blocked dependencies are often the hidden cause of slips and low predictability.</p>
+
+    <table class="manual-table">
+      <thead><tr><th>Status</th><th>Meaning</th><th>Recommended action</th></tr></thead>
+      <tbody>
+        <tr><td>Blocked</td><td>The dependent feature cannot complete as planned because another team or item has not delivered the prerequisite.</td><td>Escalate during PI sync, assign ownership, and review target sprint alignment.</td></tr>
+        <tr><td>Resolved</td><td>The dependency condition has been satisfied.</td><td>Confirm downstream work has resumed and remove the blocker from action lists.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Review dependencies effectively</h3>
+    <ol>
+      <li>Sort or scan the list for blocked items first.</li>
+      <li>Check which team owns the prerequisite and which team is waiting.</li>
+      <li>Validate that both teams agree on the target sprint and status.</li>
+      <li>Use the linked TFS items to confirm whether the blocker is real, outdated, or already resolved.</li>
+    </ol>
+  </section>
+
+  <section class="section" id="risks">
+    <h2 class="section-title">⚠ 13. Risks Section</h2>
+    <p>The Risks section focuses on ROAM management: <strong>Resolved, Owned, Accepted, Mitigated</strong>. It helps the programme decide whether delivery risk is controlled or still active.</p>
+
+    <table class="manual-table">
+      <thead><tr><th>ROAM state</th><th>Meaning</th><th>Expected user response</th></tr></thead>
+      <tbody>
+        <tr><td>Resolved</td><td>The risk is no longer active.</td><td>Confirm the closure is supported by evidence and remove it from active watchlists.</td></tr>
+        <tr><td>Owned</td><td>A named owner is actively driving follow-up action.</td><td>Review owner, due date, and latest status during programme sync.</td></tr>
+        <tr><td>Accepted</td><td>The programme acknowledges the risk and proceeds knowingly.</td><td>Ensure the acceptance decision is explicit and visible to stakeholders.</td></tr>
+        <tr><td>Mitigated</td><td>Actions are in place to reduce likelihood or impact.</td><td>Track whether the mitigation is actually lowering the exposure.</td></tr>
+      </tbody>
+    </table>
+
+    <table class="manual-table">
+      <thead><tr><th>View</th><th>Purpose</th><th>Interpretation</th></tr></thead>
+      <tbody>
+        <tr><td>ROAM risk items</td><td>Lists the active risk inventory and its current ROAM state.</td><td>Use it to decide what still requires owner action and what has been formally accepted or closed.</td></tr>
+        <tr><td>Risk heatmap</td><td>Plots severity or concentration by team / area.</td><td>Hot spots show where programme attention is required first.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="section" id="release-health">
+    <h2 class="section-title">🏥 14. Release Health Section</h2>
+    <p>Release Health summarizes readiness signals for an upcoming or in-progress release. Treat it as the answer to the question, “If we released now, how prepared are we?”</p>
+
+    <table class="manual-table">
+      <thead><tr><th>Typical metric</th><th>What it indicates</th></tr></thead>
+      <tbody>
+        <tr><td>Readiness score</td><td>Overall confidence based on delivery, quality, test, and risk signals.</td></tr>
+        <tr><td>Open blockers</td><td>Critical unresolved conditions that prevent safe release.</td></tr>
+        <tr><td>Quality trend</td><td>Whether defects and test outcomes are moving toward acceptable release condition.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Recommended review flow</h3>
+    <ol>
+      <li>Start with the readiness score to understand overall release posture.</li>
+      <li>Check blockers next; a single blocker can outweigh otherwise healthy trend signals.</li>
+      <li>Use defect, risk, and test coverage sections to validate whether the readiness score matches operational reality.</li>
+    </ol>
+  </section>
+
+  <section class="section" id="pi-delivery">
+    <h2 class="section-title">📦 15. PI Delivery Section</h2>
+    <p>PI Delivery provides a concise summary of how the PI is landing against its baseline. Use it for steering meetings where stakeholders need a direct answer on outcome progress.</p>
+
+    <table class="manual-table">
+      <thead><tr><th>Metric area</th><th>Usage</th></tr></thead>
+      <tbody>
+        <tr><td>PI delivery summary metrics</td><td>Review overall completion, progress against baseline, and whether the PI is likely to close as planned.</td></tr>
+        <tr><td>Baseline comparison</td><td>Use with snapshots to see how current delivery compares to the original PI plan.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Use PI Delivery in steering meetings</h3>
+    <ol>
+      <li>Confirm the selected PI is correct.</li>
+      <li>Check the baseline comparison first to understand whether the PI is ahead, on track, or behind plan.</li>
+      <li>Move to Features, Defects, and Risks for the root cause if the delivery summary is weak.</li>
+    </ol>
+  </section>
+
+  <section class="section" id="scope-change">
+    <h2 class="section-title">📊 16. Scope Change Tracking</h2>
+    <p>The Scope Change page compares a previously captured snapshot (your PI planning baseline) against the current live PI scope in TFS. It answers the key question: <em>"How much has our planned scope changed since PI planning?"</em></p>
+
+    <table class="manual-table">
+      <thead><tr><th>Component</th><th>What it shows</th><th>When to use it</th></tr></thead>
+      <tbody>
+        <tr><td>Snapshot selector</td><td>Lists all available snapshots. Each row shows PI labels, capture timestamp, and feature count.</td><td>Select the PI planning snapshot as your baseline, then click Compare vs Now.</td></tr>
+        <tr><td>KPI strip</td><td>Baseline points, current points, net growth %, scope churn %, added points, removed points, and RAG risk status.</td><td>Glance at whether scope has grown or shrunk and whether that growth is within acceptable bounds.</td></tr>
+        <tr><td>Scope Points bar</td><td>Side-by-side bars for Baseline, Current, Added, and Removed story points.</td><td>Visualize the magnitude of scope movement relative to the original plan.</td></tr>
+        <tr><td>Change Breakdown panel</td><td>Counts of each change type: Added/Moved-In, Removed, Estimate Changed, Sprint Moved, Team Changed.</td><td>Quickly identify which category of change is driving scope instability.</td></tr>
+        <tr><td>Change Detail table</td><td>Every changed feature with type, ID (TFS link), title, change badge, detail (old → new), points, and owner. Tabbed by change type.</td><td>Drill into specific items, open TFS links for investigation, and track ownership of scope changes.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>How risk status is calculated</h3>
+    <table class="manual-table">
+      <thead><tr><th>Status</th><th>Condition</th><th>What it means</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pill pill-green">Green</span></td><td>Net growth ≤ 5% and churn ≤ 25%</td><td>Scope is stable and within normal variance from PI planning.</td></tr>
+        <tr><td><span class="pill pill-orange">Amber</span></td><td>Net growth 5–15% or churn 25–40%</td><td>Meaningful scope movement. Review with the RTE and product management.</td></tr>
+        <tr><td><span class="pill" style="background:rgba(235,63,63,.15);color:var(--danger);border:1px solid rgba(235,63,63,.3);">Red</span></td><td>Net growth &gt; 15% or churn &gt; 40%</td><td>Significant scope change. Stakeholder communication and PI scope review required.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Change types explained</h3>
+    <table class="manual-table">
+      <thead><tr><th>Badge</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Added</strong></td><td>Feature was created after the baseline snapshot date — new scope not in the original PI plan.</td></tr>
+        <tr><td><strong>Moved In</strong></td><td>Feature existed before the snapshot but was pulled into this PI after the baseline was taken.</td></tr>
+        <tr><td><strong>Removed</strong></td><td>Feature was in the baseline but is no longer present in the current PI scope (state changed to Removed, or pulled out).</td></tr>
+        <tr><td><strong>Estimate UP / DOWN</strong></td><td>The effort (story points) on a feature changed relative to the baseline value.</td></tr>
+        <tr><td><strong>Sprint Moved</strong></td><td>The iteration path of a feature changed after the baseline — sprint re-assignment.</td></tr>
+        <tr><td><strong>Team Changed</strong></td><td>The area path / owning team of a feature changed after the baseline.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Step-by-step: how to run a scope comparison</h3>
+    <div class="step"><div class="step-num">1</div><div class="step-content"><strong>Navigate to Scope Change</strong><p>Select <strong>📊 Scope Change</strong> from the left navigation sidebar.</p></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><strong>Choose a baseline snapshot</strong><p>The snapshot list shows all previously captured PI snapshots. Select the one taken during or at the end of PI planning for the PI you want to evaluate.</p></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-content"><strong>Click "Compare vs Now"</strong><p>The server fetches the current PI scope from TFS, compares it item-by-item against the snapshot, and returns the full change set. This may take a few seconds on first run — a sidecar cache is saved for faster subsequent loads.</p></div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-content"><strong>Review the KPI strip</strong><p>Check net growth % and scope churn % first. The RAG badge gives an immediate health signal.</p></div></div>
+    <div class="step"><div class="step-num">5</div><div class="step-content"><strong>Drill into specific changes using tabs</strong><p>Use the Added, Removed, Estimate Change, Sprint Move, and Team Change tabs to filter the change table by type. Click TFS IDs to open the work item directly in TFS.</p></div></div>
+
+    <div class="info-box blue">
+      <div class="title">ℹ Snapshots as baselines</div>
+      <p>The Scope Change page reuses the same snapshots you already capture in PI Delivery. No separate baseline capture is needed. Take a snapshot at the end of PI planning; that becomes your scope baseline for the entire PI.</p>
+    </div>
+
+    <div class="info-box warn">
+      <div class="title">⚠ First compare is slower</div>
+      <p>On first comparison, the server fetches and caches the raw feature list from the snapshot's PI. Subsequent comparisons use the cached sidecar file and are much faster.</p>
+    </div>
+
+    <div class="screenshot-grid">
+      <div class="screenshot-box"><div class="icon">📊</div><div class="label">Scope Change KPI Strip and Baseline Banner</div><div class="hint">Screenshot placeholder</div></div>
+      <div class="screenshot-box"><div class="icon">📋</div><div class="label">Change Detail Table with TFS Links</div><div class="hint">Screenshot placeholder</div></div>
+    </div>
+  </section>
+
+  <section class="section" id="insights">
+    <h2 class="section-title">🔬 17. Insights</h2>
+    <p>The Insights section surfaces AI-generated observations and anomaly detection so users can focus on meaningful changes instead of manually scanning every chart.</p>
+
+    <table class="manual-table">
+      <thead><tr><th>Capability</th><th>Description</th><th>User guidance</th></tr></thead>
+      <tbody>
+        <tr><td>AI-generated insights</td><td>Highlights unusual delivery, quality, or planning conditions.</td><td>Use as a prioritization aid, then validate the claim against the underlying chart or table.</td></tr>
+        <tr><td>Anomaly detection thresholds</td><td>Flags metrics that move beyond configured tolerance bands.</td><td>Thresholds should be reviewed in Settings to ensure they match programme expectations.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="info-box blue">
+      <div class="title">ℹ Use insights as guidance, not authority</div>
+      <p>Insights help users spot unusual patterns quickly, but final operational decisions should always be based on the supporting delivery, defect, risk, and test data shown elsewhere in the dashboard.</p>
+    </div>
+  </section>
+
+  <section class="section" id="snapshots">
+    <h2 class="section-title">📋 18. Snapshots</h2>
+    <p>A snapshot is a point-in-time capture of the PI plan. It freezes planning state so the dashboard can later compare live delivery against the original baseline.</p>
+
+    <h3>Take a snapshot</h3>
+    <div class="step"><div class="step-num">1</div><div class="step-content"><strong>Click <span class="pill pill-blue">📋 PI Plan Data</span> in the top bar</strong><p>This opens the snapshot selector and management panel.</p></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><strong>Select the PI you want to capture</strong><p>Choose the PI that represents the planning baseline you want to preserve.</p></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-content"><strong>Click Capture</strong><p>The dashboard stores a point-in-time copy of the planning data for later comparison.</p></div></div>
+
+    <h3>What a snapshot captures</h3>
+    <table class="manual-table">
+      <thead><tr><th>Captured data</th><th>Used for</th></tr></thead>
+      <tbody>
+        <tr><td>Features</td><td>Predictability, committed-vs-delivered analysis, and PI baseline comparison.</td></tr>
+        <tr><td>Defects</td><td>Quality baseline and change tracking over time.</td></tr>
+        <tr><td>Objectives</td><td>Objective linkage and planning comparison.</td></tr>
+        <tr><td>Risks</td><td>Tracking whether risk posture improved or worsened after planning.</td></tr>
+        <tr><td>Test coverage</td><td>Coverage delta and validation-readiness comparison.</td></tr>
+        <tr><td>Other section metrics</td><td>Programme-level before/after analysis for release, velocity, PI checks, and dependencies where captured.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Use snapshots for predictability and test coverage delta</h3>
+    <ol>
+      <li>Select a snapshot in the top bar.</li>
+      <li>Go to <strong>Features → Predictability</strong> to compare planned versus live feature completion.</li>
+      <li>Go to the Test Coverage view if you want to review coverage delta since the snapshot was taken.</li>
+    </ol>
+
+    <h3>Manage snapshots</h3>
+    <ul>
+      <li>Open the PI Plan Data panel to see the snapshot list.</li>
+      <li>Select a snapshot to make it active for comparison views.</li>
+      <li>Delete outdated or incorrect snapshots when they are no longer required.</li>
+      <li>Snapshots are stored in the project’s <code>snapshots/</code> folder.</li>
+    </ul>
+
+    <div class="info-box warn">
+      <div class="title">⚠ Baseline discipline</div>
+      <p>Capture the first snapshot immediately after PI planning. If you capture only late revisions, predictability views will no longer represent the original commitment baseline.</p>
+    </div>
+  </section>
+
+  <section class="section" id="tfs-links">
+    <h2 class="section-title">🔗 19. TFS Links</h2>
+    <p>Deep linking is a core AV Dashboard feature. Most charts are not just visual summaries; they are launch points into the exact TFS work item subset behind the number.</p>
+
+    <table class="manual-table">
+      <thead><tr><th>Link source</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>Chart bar / slice / segment</td><td>Opens a filtered TFS query in a new browser tab.</td></tr>
+        <tr><td>Table ID link (#12345)</td><td>Opens the specific TFS work item.</td></tr>
+        <tr><td>Saved PI check link</td><td>Opens the source saved query or related work item list in TFS.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>How query filters are built</h3>
+    <div class="code-block"><span class="lang-tag">wiql</span><pre>WHERE AreaPath      UNDER configured programme/team path
+  AND IterationPath UNDER selected PI or sprint path
+  AND State         IN selected chart state(s)
+  AND WorkItemType  = Feature or Defect</pre></div>
+    <p>In practice, the dashboard injects the currently selected area path, PI, sprint, and state values so users land directly on the relevant records instead of a generic backlog view.</p>
+  </section>
+
+  <section class="section" id="settings">
+    <h2 class="section-title">⚙️ 20. Settings</h2>
+    <p>The Settings section controls how the dashboard connects to TFS, interprets data, scores health, triggers notifications, and brands the UI.</p>
+
+    <table class="manual-table">
+      <thead><tr><th>Category</th><th>Configuration examples</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>TFS configuration</td><td>Base URL, PAT, Area Path, Iteration Path, Team Root Path</td><td>Defines where the application fetches data and how it scopes the programme.</td></tr>
+        <tr><td>Field mappings</td><td>Effort field, story points field, work item type names</td><td>Lets the dashboard read the correct TFS custom fields.</td></tr>
+        <tr><td>State values</td><td>Done, WIP, Removed lists</td><td>Controls how charts classify work item states.</td></tr>
+        <tr><td>PI Structure</td><td>Sprint labels, PIs per year, PI naming pattern, <strong>Hours per Man-Day</strong></td><td>Controls PI navigation, sprint breakdown, and capacity unit conversion. <strong>Hours per Man-Day</strong> (default: 6) converts TFS Development capacity hours into man-days so they are directly comparable to Feature Effort in the Team Summary chart.</td></tr>
+        <tr><td>Defect escape ratio formula</td><td>Numerator and denominator states</td><td>Determines how quality leakage is calculated.</td></tr>
+        <tr><td>RAG thresholds</td><td>Green / amber / red percentages</td><td>Controls how health widgets are colored and interpreted.</td></tr>
+        <tr><td>Notifications</td><td>Webhook URL for Teams or Slack</td><td>Allows automated alerts for configured conditions.</td></tr>
+        <tr><td>GitHub repos</td><td>Repository list and CI configuration</td><td>Enables optional GitHub CI matrix and related coverage views.</td></tr>
+        <tr><td>Branding</td><td>Title, subtitle, theme labels</td><td>Customizes how the dashboard is presented to the programme.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="info-box blue">
+      <div class="title">ℹ After changing settings</div>
+      <p>Save first, then use Refresh. Many dashboard calculations are configuration-driven, so the UI may need a full data reload before the updated behavior is visible.</p>
+    </div>
+  </section>
+
+  <section class="section" id="troubleshooting">
+    <h2 class="section-title">🔧 21. Troubleshooting</h2>
+    <p>If a section looks empty or inconsistent, start by checking filters, snapshot selection, and TFS configuration. Most issues are caused by expired credentials or incorrect path settings.</p>
+
+    <table class="manual-table">
+      <thead><tr><th>Problem</th><th>Likely cause</th><th>Resolution</th></tr></thead>
+      <tbody>
+        <tr><td>PAT expired</td><td>The saved TFS token is no longer valid.</td><td>Generate a new PAT in TFS, update Settings, save, and refresh the dashboard.</td></tr>
+        <tr><td>No data</td><td>Incorrect area path or iteration path.</td><td>Verify programme scope in Settings and ensure the configured paths match TFS exactly.</td></tr>
+        <tr><td>Charts empty after refresh</td><td>Data load still in progress or server refresh still running.</td><td>Wait briefly and refresh again if needed. For large queries, allow extra time for TFS responses.</td></tr>
+        <tr><td>Team filter not working</td><td><code>teamRootPath</code> is wrong or incomplete.</td><td>Review the team root configuration and confirm the expected teams exist under that path in TFS.</td></tr>
+        <tr><td>Snapshot not found</td><td>The expected snapshot file does not exist.</td><td>Check that the <code>snapshots/</code> folder exists and that the required PI snapshot was captured successfully.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="info-box warn">
+      <div class="title">⚠ Fast triage checklist</div>
+      <p>When in doubt, confirm these four items in order: selected PI, selected team, active snapshot, and TFS settings. Most apparent dashboard issues come from one of those filters or inputs.</p>
+    </div>
+  </section>
+</main>
+</body>
+</html>
+

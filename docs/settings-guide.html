@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AV Dashboard – Settings &amp; Configuration Guide</title>
+<style>
+  :root{
+    --bg:#242424;--bg-card:#2B2B2B;--bg-card2:#363636;--bg-sidebar:#171717;
+    --text:#ffffff;--muted:#ADADAD;--disabled:rgba(255,255,255,.32);
+    --border:#454545;--border-sub:#3D3D3D;
+    --primary:#0072db;--primary-hov:#0061c2;--primary-act:#0052a3;
+    --primary-light:#1492ff;--primary-sub:#b8e0ff;--brand:#0b5ed7;
+    --success:#068443;--success-lt:#25938d;--warning:#fa7000;
+    --caution:#F5CC00;--danger:#eb3f3f;--info:#5260FF;
+    --purple:#858FFF;--orange:#ff7f0f;--teal:#21837c;
+    --radius:6px;--radius-lg:12px;--radius-pill:999px;
+    --shadow-sm:0 0 2px rgba(0,0,0,.32),0 4px 8px rgba(0,0,0,.64);
+    --shadow-lg:0 0 2px rgba(0,0,0,.32),0 16px 16px rgba(0,0,0,.16),0 24px 32px rgba(0,0,0,.32);
+    --motion-s:160ms;--motion-m:240ms;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-size:14px;line-height:20px;background:var(--bg);color:var(--text);display:flex;min-height:100vh;}
+  .sidebar{width:270px;background:var(--bg-sidebar);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 0;flex-shrink:0;box-shadow:var(--shadow-sm);}
+  .sidebar-brand{padding:0 20px 20px;border-bottom:1px solid var(--border);margin-bottom:16px;}
+  .sidebar-brand .logo{font-size:17px;font-weight:700;color:var(--primary-light);}
+  .sidebar-brand .sub{font-size:11px;color:var(--muted);margin-top:2px;}
+  .sidebar-section{padding:8px 20px 4px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:600;}
+  .sidebar a{display:block;padding:6px 20px;font-size:13px;color:var(--muted);text-decoration:none;border-left:3px solid transparent;transition:all .15s;}
+  .sidebar a:hover,.sidebar a.active{color:var(--primary-light);background:rgba(20,146,255,.07);border-left-color:var(--primary-light);}
+  .main{flex:1;padding:48px 56px;max-width:1140px;}
+  .doc-header{margin-bottom:48px;padding-bottom:32px;border-bottom:1px solid var(--border);}
+  .doc-header h1{font-size:30px;font-weight:700;margin-bottom:8px;}
+  .doc-header .tagline{font-size:15px;color:var(--muted);margin-bottom:20px;}
+  .meta-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  .meta-item{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 16px;}
+  .meta-item .label{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:4px;}
+  .meta-item .value{font-size:13px;font-weight:600;}
+  .section{margin-bottom:56px;}
+  .section-title{font-size:21px;font-weight:700;color:var(--primary-light);padding-bottom:12px;border-bottom:1px solid var(--border);margin-bottom:24px;display:flex;align-items:center;gap:10px;}
+  h3{font-size:15px;font-weight:600;color:var(--text);margin:28px 0 12px;padding-left:12px;border-left:3px solid var(--primary-light);}
+  h4{font-size:12px;font-weight:700;color:var(--muted);margin:16px 0 8px;text-transform:uppercase;letter-spacing:.8px;}
+  p{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:12px;}
+  /* Tables */
+  table{width:100%;border-collapse:collapse;margin:12px 0 20px;font-size:13px;}
+  th{text-align:left;padding:8px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:2px solid var(--border);}
+  td{padding:9px 12px;border-bottom:1px solid var(--border-sub);color:var(--text);vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  td.def{font-family:'Consolas','Courier New',monospace;font-size:12px;color:#96D0FF;}
+  td.desc{color:var(--muted);font-size:13px;}
+  td.impact{font-size:11px;}
+  /* Badges */
+  .badge{display:inline-block;padding:2px 7px;border-radius:3px;font-size:10px;font-weight:700;margin:2px 2px 2px 0;}
+  .badge-blue{background:rgba(20,146,255,.15);color:#60aaff;border:1px solid rgba(20,146,255,.3);}
+  .badge-green{background:rgba(6,132,67,.15);color:#4ade80;border:1px solid rgba(6,132,67,.3);}
+  .badge-amber{background:rgba(245,204,0,.12);color:#fcd34d;border:1px solid rgba(245,204,0,.3);}
+  .badge-purple{background:rgba(133,143,255,.15);color:var(--purple);border:1px solid rgba(133,143,255,.3);}
+  .badge-red{background:rgba(235,63,63,.12);color:#f87171;border:1px solid rgba(235,63,63,.3);}
+  .badge-teal{background:rgba(33,131,124,.15);color:#5eead4;border:1px solid rgba(33,131,124,.3);}
+  .badge-admin{background:rgba(250,112,0,.15);color:#fb923c;border:1px solid rgba(250,112,0,.3);}
+  /* Checklist */
+  .checklist{list-style:none;margin:12px 0 20px;}
+  .checklist li{display:flex;gap:10px;align-items:flex-start;padding:8px 12px;border-bottom:1px solid var(--border-sub);font-size:13px;color:var(--muted);}
+  .checklist li:last-child{border-bottom:none;}
+  .checklist li .cb{width:18px;height:18px;border:2px solid var(--border);border-radius:3px;flex-shrink:0;margin-top:1px;}
+  .checklist li strong{color:var(--text);}
+  .checklist li .tag-req{font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;margin-left:6px;flex-shrink:0;}
+  .req{background:rgba(235,63,63,.15);color:#f87171;border:1px solid rgba(235,63,63,.3);}
+  .opt{background:rgba(20,146,255,.15);color:#60aaff;border:1px solid rgba(20,146,255,.3);}
+  .adm{background:rgba(250,112,0,.15);color:#fb923c;border:1px solid rgba(250,112,0,.3);}
+  /* Checklist section card */
+  .cl-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:24px;}
+  .cl-card-header{padding:12px 18px;background:var(--bg-card2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+  .cl-card-header .cl-title{font-size:14px;font-weight:700;}
+  .cl-card-header .cl-sub{font-size:12px;color:var(--muted);}
+  /* Info / callout */
+  .callout{border-radius:var(--radius);padding:12px 16px;margin:12px 0 20px;font-size:13px;line-height:1.6;}
+  .callout-blue{background:rgba(20,146,255,.08);border:1px solid rgba(20,146,255,.25);color:#93c5fd;}
+  .callout-amber{background:rgba(245,204,0,.08);border:1px solid rgba(245,204,0,.25);color:#fcd34d;}
+  .callout-red{background:rgba(235,63,63,.08);border:1px solid rgba(235,63,63,.25);color:#fca5a5;}
+  .callout-green{background:rgba(6,132,67,.08);border:1px solid rgba(6,132,67,.25);color:#86efac;}
+  .callout strong{font-weight:700;}
+  /* Code */
+  .code-block{background:#0d0d0d;border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 20px;margin:12px 0;overflow-x:auto;}
+  .code-block pre{font-family:'Consolas','Courier New',monospace;font-size:12px;line-height:1.8;color:#CDD9E5;}
+  .kw{color:#F47067;} .str{color:#96D0FF;} .prop{color:#8DDB8C;} .num{color:#6CB6FF;} .cmt{color:#768390;font-style:italic;}
+  /* Steps */
+  .step{display:flex;gap:14px;margin-bottom:16px;align-items:flex-start;}
+  .step-num{width:28px;height:28px;border-radius:50%;background:rgba(20,146,255,.15);border:2px solid var(--primary-light);color:var(--primary-light);font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+  .step-content{flex:1;}
+  .step-content strong{color:var(--text);display:block;margin-bottom:3px;}
+  /* Fieldset-like groups */
+  .fgroup{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:20px;}
+  .fgroup-head{padding:10px 16px;background:var(--bg-card2);border-bottom:1px solid var(--border);font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}
+  .fgroup-body{padding:4px 0;}
+  /* Admin-only banner */
+  .admin-banner{display:inline-flex;align-items:center;gap:6px;background:rgba(250,112,0,.12);border:1px solid rgba(250,112,0,.3);color:#fb923c;padding:4px 12px;border-radius:3px;font-size:11px;font-weight:700;margin-bottom:12px;}
+  /* Tab pill */
+  .tab-pill{display:inline-block;padding:3px 10px;border-radius:3px;font-size:11px;font-weight:700;background:var(--bg-card2);border:1px solid var(--border);color:var(--muted);margin-right:4px;}
+  /* Back link */
+  .back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:12px;text-decoration:none;margin-bottom:32px;}
+  .back:hover{color:var(--primary-light);}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">⚙️ Settings Guide</div>
+    <div class="sub">AV Dashboard v2.2 · ICAP ISP</div>
+  </div>
+
+  <div class="sidebar-section">Checklists</div>
+  <a href="#checklist-deploy">🚀 New System Deployment</a>
+  <a href="#checklist-team">👥 New Team Onboarding</a>
+
+  <div class="sidebar-section">Settings Tabs</div>
+  <a href="#tfs">🔌 TFS Connection</a>
+  <a href="#branding">🎨 Branding</a>
+  <a href="#appearance">🌗 Appearance</a>
+  <a href="#rag">🚦 RAG Thresholds</a>
+  <a href="#field-mappings">🧭 Field Mappings</a>
+  <a href="#roles">👤 Roles</a>
+  <a href="#notifications">🔔 Notifications</a>
+  <a href="#advanced">🛠 Advanced</a>
+  <a href="#azure-ad">☁️ Azure AD <span style="font-size:10px;color:var(--warning)">(Admin)</span></a>
+  <a href="#role-mappings">🗝 Role Mappings <span style="font-size:10px;color:var(--warning)">(Admin)</span></a>
+  <a href="#visibility">🛡 Visibility <span style="font-size:10px;color:var(--warning)">(Admin)</span></a>
+
+  <div class="sidebar-section">Reference</div>
+  <a href="#defaults">📋 Default Values</a>
+  <a href="#config-file">📄 config.json Schema</a>
+  <a href="index.html">← Doc Hub</a>
+</nav>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<main class="main">
+
+  <a class="back" href="index.html">← Documentation Hub</a>
+
+  <div class="doc-header">
+    <h1>⚙️ Settings &amp; Configuration Guide</h1>
+    <div class="tagline">Step-by-step configuration reference for onboarding new teams and deploying on new systems.</div>
+    <div class="meta-grid">
+      <div class="meta-item"><div class="label">Version</div><div class="value">v2.2</div></div>
+      <div class="meta-item"><div class="label">Audience</div><div class="value">Admins · DevOps · RTE</div></div>
+      <div class="meta-item"><div class="label">Access</div><div class="value">Settings → ⚙️ icon</div></div>
+      <div class="meta-item"><div class="label">Tabs</div><div class="value">11 tabs (3 admin-only)</div></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       DEPLOYMENT CHECKLIST
+  ══════════════════════════════════════════════════ -->
+  <div class="section" id="checklist-deploy">
+    <div class="section-title">🚀 New System Deployment Checklist</div>
+    <p>Complete every <span class="tag-req req" style="display:inline;">REQUIRED</span> item before going live. Optional items improve experience but are not blocking.</p>
+
+    <div class="cl-card">
+      <div class="cl-card-header">
+        <span style="font-size:20px;">1️⃣</span>
+        <div>
+          <div class="cl-title">Infrastructure &amp; Server</div>
+          <div class="cl-sub">Before launching the Node.js process</div>
+        </div>
+      </div>
+      <ul class="checklist">
+        <li><div class="cb"></div><div><strong>Node.js 18+ installed</strong> — verify with <code>node -v</code><span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Run <code>npm install</code></strong> in the project root to install all dependencies<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Run <code>npm run build</code></strong> to compile the React client into <code>dist/</code><span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Confirm port 3000 is free</strong> or set <code>PORT</code> env variable<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Start server</strong> — <code>node server.js</code> (or via PM2 / Windows Service)<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Verify <code>config.json</code></strong> is writable in the project root (server writes settings here)<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Set up process manager</strong> (PM2, NSSM, Windows Task Scheduler) for auto-restart<span class="tag-req opt">OPTIONAL</span></div></li>
+      </ul>
+    </div>
+
+    <div class="cl-card">
+      <div class="cl-card-header">
+        <span style="font-size:20px;">2️⃣</span>
+        <div>
+          <div class="cl-title">TFS Connection</div>
+          <div class="cl-sub">Settings → TFS Connection tab</div>
+        </div>
+      </div>
+      <ul class="checklist">
+        <li><div class="cb"></div><div><strong>Enter TFS Base URL</strong> — e.g. <code>https://tfs.company.com/tfs/Collection</code><span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Generate a PAT</strong> with <em>Work Items (Read)</em> scope in TFS and paste it<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Set Area Path</strong> — root area path of the programme (e.g. <code>Healthcare IT\ICAP\ISP</code>)<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Set Team Root Path(s)</strong> — one line per team parent path. Each line must be one level above team nodes<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Set Iteration Path</strong> — root iteration used for PI/Sprint queries<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Click "Test Connection"</strong> — confirm team list is returned with ✅<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Save TFS Settings</strong><span class="tag-req req">REQUIRED</span></div></li>
+      </ul>
+    </div>
+
+    <div class="cl-card">
+      <div class="cl-card-header">
+        <span style="font-size:20px;">3️⃣</span>
+        <div>
+          <div class="cl-title">Field Mappings</div>
+          <div class="cl-sub">Settings → Field Mappings tab — adapt to your process template</div>
+        </div>
+      </div>
+      <ul class="checklist">
+        <li><div class="cb"></div><div><strong>Work Item Types</strong> — confirm or adjust names for Feature, Story, Defect, Objective, Risk, Epic, Task<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Effort / Story Points fields</strong> — set TFS reference names for effort and story points fields<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Release field</strong> — set the custom release grouping field reference name<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Defect Classification field</strong> — for enhancement exclusion logic<span class="tag-req opt">OPTIONAL</span></div></li>
+        <li><div class="cb"></div><div><strong>Feature Done / Removed states</strong> — single-value state strings<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Feature WIP + All States</strong> — comma-separated lists<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Story Done + WIP + Removed</strong> — comma-separated<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Defect Closed + Removed states</strong><span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Sprint Labels</strong> — e.g. <code>S1, S2, S3, IP</code><span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>PIs Per Year</strong> — default 4<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>PI Naming Pattern</strong> — e.g. <code>{yy}-PI{n}</code> → <code>26-PI1</code><span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Hours per Man-Day</strong> — default 6. Adjust if your team works different hours<span class="tag-req opt">OPTIONAL</span></div></li>
+        <li><div class="cb"></div><div><strong>Save Field Mappings</strong><span class="tag-req req">REQUIRED</span></div></li>
+      </ul>
+    </div>
+
+    <div class="cl-card">
+      <div class="cl-card-header">
+        <span style="font-size:20px;">4️⃣</span>
+        <div>
+          <div class="cl-title">RAG Thresholds</div>
+          <div class="cl-sub">Settings → RAG Thresholds tab</div>
+        </div>
+      </div>
+      <ul class="checklist">
+        <li><div class="cb"></div><div><strong>Review Done Rate</strong> thresholds — default Green ≥ 80%, Amber ≥ 50%<span class="tag-req opt">OPTIONAL</span></div></li>
+        <li><div class="cb"></div><div><strong>Review Escape Ratio</strong> — default Green ≤ 20%, Amber ≤ 40%<span class="tag-req opt">OPTIONAL</span></div></li>
+        <li><div class="cb"></div><div><strong>Adjust thresholds</strong> to match your programme's targets, then Save<span class="tag-req opt">OPTIONAL</span></div></li>
+      </ul>
+    </div>
+
+    <div class="cl-card">
+      <div class="cl-card-header">
+        <span style="font-size:20px;">5️⃣</span>
+        <div>
+          <div class="cl-title">Advanced &amp; Branding</div>
+          <div class="cl-sub">Settings → Advanced + Branding tabs</div>
+        </div>
+      </div>
+      <ul class="checklist">
+        <li><div class="cb"></div><div><strong>Programme Start Year</strong> — used for PI year calculations (Advanced tab)<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Data Refresh Interval</strong> — default 30 min. Set lower for high-frequency data, higher to reduce TFS load<span class="tag-req opt">OPTIONAL</span></div></li>
+        <li><div class="cb"></div><div><strong>Company / App Name</strong> — Branding tab, shown in title bar and sidebar<span class="tag-req opt">OPTIONAL</span></div></li>
+        <li><div class="cb"></div><div><strong>Primary Color</strong> — colour picker for accent. Default accent blue <code>#1492ff</code><span class="tag-req opt">OPTIONAL</span></div></li>
+        <li><div class="cb"></div><div><strong>Logo</strong> — URL or inline SVG. Clear both fields to use text branding<span class="tag-req opt">OPTIONAL</span></div></li>
+      </ul>
+    </div>
+
+    <div class="cl-card">
+      <div class="cl-card-header">
+        <span style="font-size:20px;">6️⃣</span>
+        <div>
+          <div class="cl-title">Authentication (Admin-only)</div>
+          <div class="cl-sub">Settings → Azure AD + Role Mappings (admin role required)</div>
+        </div>
+      </div>
+      <ul class="checklist">
+        <li><div class="cb"></div><div><strong>Register app in Azure AD</strong> — note Tenant ID, Client ID, generate Client Secret<span class="tag-req adm">ADMIN</span></div></li>
+        <li><div class="cb"></div><div><strong>Set Redirect URL</strong> — must match the callback URL registered in Azure AD app<span class="tag-req adm">ADMIN</span></div></li>
+        <li><div class="cb"></div><div><strong>Save Azure AD settings</strong> and restart the server to apply OIDC client<span class="tag-req adm">ADMIN</span></div></li>
+        <li><div class="cb"></div><div><strong>Add Role Mappings</strong> — map Azure AD groups/email patterns to dashboard roles (exec, rte, pm, sm, admin)<span class="tag-req adm">ADMIN</span></div></li>
+        <li><div class="cb"></div><div><strong>Configure Admin Roles</strong> — roles with full settings access<span class="tag-req adm">ADMIN</span></div></li>
+      </ul>
+    </div>
+
+    <div class="cl-card">
+      <div class="cl-card-header">
+        <span style="font-size:20px;">7️⃣</span>
+        <div>
+          <div class="cl-title">Notifications</div>
+          <div class="cl-sub">Settings → Notifications tab</div>
+        </div>
+      </div>
+      <ul class="checklist">
+        <li><div class="cb"></div><div><strong>Paste MS Teams / Slack webhook URL</strong> for digest delivery<span class="tag-req opt">OPTIONAL</span></div></li>
+        <li><div class="cb"></div><div><strong>Set Digest Schedule</strong> — day + hour of weekly digest<span class="tag-req opt">OPTIONAL</span></div></li>
+        <li><div class="cb"></div><div><strong>Choose Digest Sections</strong> — Delivery, Quality, Forecast, Risks, Velocity<span class="tag-req opt">OPTIONAL</span></div></li>
+        <li><div class="cb"></div><div><strong>Test Webhook</strong> — click "Send Test" to confirm delivery<span class="tag-req opt">OPTIONAL</span></div></li>
+        <li><div class="cb"></div><div><strong>Set Threshold Alerts</strong> — configure metric + role + threshold for real-time alerts<span class="tag-req opt">OPTIONAL</span></div></li>
+        <li><div class="cb"></div><div><strong>Save &amp; Enable</strong> toggle notifications on<span class="tag-req opt">OPTIONAL</span></div></li>
+      </ul>
+    </div>
+
+    <div class="cl-card">
+      <div class="cl-card-header">
+        <span style="font-size:20px;">8️⃣</span>
+        <div>
+          <div class="cl-title">Visibility Policies (Admin-only)</div>
+          <div class="cl-sub">Settings → Visibility tab — control what each role sees</div>
+        </div>
+      </div>
+      <ul class="checklist">
+        <li><div class="cb"></div><div><strong>Select each role</strong> (All, Exec, RTE, PM, SM) and configure visible sections, including Scope Change where appropriate<span class="tag-req adm">ADMIN</span></div></li>
+        <li><div class="cb"></div><div><strong>Expand section cards</strong> to toggle individual tabs and chart cards per role<span class="tag-req adm">ADMIN</span></div></li>
+        <li><div class="cb"></div><div><strong>Save Policies</strong> — changes take effect immediately on next page load<span class="tag-req adm">ADMIN</span></div></li>
+      </ul>
+    </div>
+
+    <div class="callout callout-green">
+      ✅ <strong>Deployment complete</strong> when: TFS Test Connection passes, data loads on dashboard, at least one PI is visible in PI Delivery.
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       TEAM ONBOARDING CHECKLIST
+  ══════════════════════════════════════════════════ -->
+  <div class="section" id="checklist-team">
+    <div class="section-title">👥 New Team Onboarding Checklist</div>
+    <p>Use this when adding a <strong>new Agile Release Train team</strong> to an already-running system.</p>
+
+    <div class="cl-card">
+      <div class="cl-card-header">
+        <span style="font-size:20px;">🔌</span>
+        <div>
+          <div class="cl-title">TFS Paths</div>
+          <div class="cl-sub">Settings → TFS Connection</div>
+        </div>
+      </div>
+      <ul class="checklist">
+        <li><div class="cb"></div><div><strong>Add new Team Root Path</strong> — open TFS Connection, add one new line for the team's parent path<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Confirm Area Path</strong> includes the new team's work items<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Confirm Iteration Path</strong> includes the new team's sprint iterations<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Test Connection</strong> — new team should appear in the returned team list<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Save &amp; reload</strong> dashboard — new team should appear in Team selector dropdowns<span class="tag-req req">REQUIRED</span></div></li>
+      </ul>
+    </div>
+
+    <div class="cl-card">
+      <div class="cl-card-header">
+        <span style="font-size:20px;">🧭</span>
+        <div>
+          <div class="cl-title">Field Mapping Validation</div>
+          <div class="cl-sub">Settings → Field Mappings — verify the new team uses same process template</div>
+        </div>
+      </div>
+      <ul class="checklist">
+        <li><div class="cb"></div><div><strong>Check Work Item Type names</strong> — confirm new team's TFS uses the same type names (Feature, Story, etc.)<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Check custom field reference names</strong> (Effort, Release, Severity, etc.) — if team uses different names, update mappings<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Check State Values</strong> — new team's Done/WIP/Removed state names must match configured values<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Check Sprint labels</strong> — confirm PI sprint labels match iteration naming for the new team<span class="tag-req req">REQUIRED</span></div></li>
+      </ul>
+    </div>
+
+    <div class="cl-card">
+      <div class="cl-card-header">
+        <span style="font-size:20px;">👤</span>
+        <div>
+          <div class="cl-title">User Access</div>
+          <div class="cl-sub">Settings → Role Mappings (Admin)</div>
+        </div>
+      </div>
+      <ul class="checklist">
+        <li><div class="cb"></div><div><strong>Add role mappings</strong> for the new team's Scrum Master → <code>sm</code> role<span class="tag-req adm">ADMIN</span></div></li>
+        <li><div class="cb"></div><div><strong>Add role mappings</strong> for the new team's PM / PO → <code>pm</code> role<span class="tag-req adm">ADMIN</span></div></li>
+        <li><div class="cb"></div><div><strong>Verify Visibility Policies</strong> — confirm the relevant roles can see required sections<span class="tag-req adm">ADMIN</span></div></li>
+      </ul>
+    </div>
+
+    <div class="cl-card">
+      <div class="cl-card-header">
+        <span style="font-size:20px;">✅</span>
+        <div>
+          <div class="cl-title">Validation</div>
+          <div class="cl-sub">Verify data is visible for the new team</div>
+        </div>
+      </div>
+      <ul class="checklist">
+        <li><div class="cb"></div><div><strong>PI Delivery page</strong> — new team's features should appear in current PI<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Velocity page</strong> — team selector includes new team<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Sprint page</strong> — sprints load for the new team's iterations<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Team Summary</strong> (Features page) — new team row appears in capacity chart<span class="tag-req req">REQUIRED</span></div></li>
+        <li><div class="cb"></div><div><strong>Defects page</strong> — defects for the new team are visible<span class="tag-req opt">OPTIONAL</span></div></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       TFS CONNECTION
+  ══════════════════════════════════════════════════ -->
+  <div class="section" id="tfs">
+    <div class="section-title">🔌 TFS Connection</div>
+    <p>Configures how the dashboard authenticates to and queries Azure DevOps Server (TFS). All dashboard data originates from these settings.</p>
+
+    <table>
+      <thead><tr><th>Field</th><th>Description</th><th>Default</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>TFS Base URL</strong></td>
+          <td class="desc">Root URL of the TFS collection. Must be reachable from the server process.</td>
+          <td class="def">—</td>
+          <td class="def">https://tfs.company.com/tfs/DefaultCollection</td>
+        </tr>
+        <tr>
+          <td><strong>Personal Access Token</strong></td>
+          <td class="desc">PAT with Work Items (Read) scope. Stored encrypted in config.json. Leave blank on re-save to keep existing value.</td>
+          <td class="def">—</td>
+          <td class="def">abc123xyz…</td>
+        </tr>
+        <tr>
+          <td><strong>Area Path</strong></td>
+          <td class="desc">Root area path that scopes all WIQL queries. Must contain all teams' work items.</td>
+          <td class="def">—</td>
+          <td class="def">Healthcare IT\ICAP\ISP</td>
+        </tr>
+        <tr>
+          <td><strong>Team Root Path(s)</strong></td>
+          <td class="desc">One path per line. Each path is one level <em>above</em> individual team nodes. Used to discover team list.</td>
+          <td class="def">—</td>
+          <td class="def">Healthcare IT\ICAP\ISP\Hercules</td>
+        </tr>
+        <tr>
+          <td><strong>Iteration Path</strong></td>
+          <td class="desc">Root iteration path for PI/Sprint lookups. All sprint iterations must live under this path.</td>
+          <td class="def">—</td>
+          <td class="def">Healthcare IT\ICAP\ISP</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-amber">
+      ⚠️ <strong>PAT Rotation:</strong> When a PAT expires, open TFS Connection, paste the new PAT, and save. The old value is automatically replaced. All PATs are stored server-side only.
+    </div>
+
+    <h3>Test Connection Button</h3>
+    <p>Clicking <strong>🔌 Test Connection</strong> calls <code>/api/teams</code> and displays the returned team list. A successful test confirms: Base URL reachable, PAT valid, Area Path correct. Always test after any TFS change.</p>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       BRANDING
+  ══════════════════════════════════════════════════ -->
+  <div class="section" id="branding">
+    <div class="section-title">🎨 Branding</div>
+    <p>Customize the dashboard identity. Changes apply instantly to the sidebar, title bar, and browser tab.</p>
+
+    <table>
+      <thead><tr><th>Field</th><th>Description</th><th>Default</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Company Name</strong></td><td class="desc">Shown under the logo in the sidebar</td><td class="def">AV Dashboard</td></tr>
+        <tr><td><strong>App Name</strong></td><td class="desc">Primary heading in the sidebar header</td><td class="def">AV Dashboard</td></tr>
+        <tr><td><strong>App Subtitle</strong></td><td class="desc">Secondary line under the app name</td><td class="def">ISP Programme</td></tr>
+        <tr><td><strong>Logo URL</strong></td><td class="desc">External image URL for the logo (PNG/SVG). Takes priority over Logo SVG.</td><td class="def">—</td></tr>
+        <tr><td><strong>Logo SVG</strong></td><td class="desc">Inline SVG markup. Used when no Logo URL is set.</td><td class="def">—</td></tr>
+        <tr><td><strong>Primary Color</strong></td><td class="desc">Accent colour used for buttons, active states, and highlights across all pages.</td><td class="def">#1492ff</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-blue">
+      ℹ️ Logo URL takes priority over Logo SVG. Clear both to fall back to text branding using Company Name.
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       APPEARANCE
+  ══════════════════════════════════════════════════ -->
+  <div class="section" id="appearance">
+    <div class="section-title">🌗 Appearance</div>
+    <p>Per-user theme selection. Stored in browser <code>localStorage</code> — not a server setting. Each user can set their own theme independently.</p>
+
+    <table>
+      <thead><tr><th>Theme</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Dark</strong> <span class="badge badge-blue">Default</span></td><td class="desc">Dark mode — dark grey backgrounds, blue accent</td></tr>
+        <tr><td><strong>Midnight</strong></td><td class="desc">Deep navy, inspired by GitHub dark mode</td></tr>
+        <tr><td><strong>OLED Black</strong></td><td class="desc">Pure black backgrounds — best for OLED screens</td></tr>
+        <tr><td><strong>Charcoal</strong></td><td class="desc">VS Code–inspired grey tones, blue accent</td></tr>
+        <tr><td><strong>Light</strong></td><td class="desc">Clean light mode for bright environments</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       RAG THRESHOLDS
+  ══════════════════════════════════════════════════ -->
+  <div class="section" id="rag">
+    <div class="section-title">🚦 RAG Thresholds</div>
+    <p>Controls when health indicators turn 🟢 Green, 🟡 Amber, or 🔴 Red. Used in KPI strips, health scores, and release health cards across all pages.</p>
+
+    <table>
+      <thead><tr><th>Metric</th><th>Direction</th><th>Green (default)</th><th>Amber (default)</th><th>Used in</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Done Rate</strong></td>
+          <td class="desc">≥ is better</td>
+          <td class="def">≥ 80%</td>
+          <td class="def">≥ 50%</td>
+          <td><span class="badge badge-blue">PI Delivery</span><span class="badge badge-purple">Features</span></td>
+        </tr>
+        <tr>
+          <td><strong>Resolve Rate</strong></td>
+          <td class="desc">≥ is better</td>
+          <td class="def">≥ 70%</td>
+          <td class="def">≥ 40%</td>
+          <td><span class="badge badge-red">Defects</span><span class="badge badge-teal">Release Health</span></td>
+        </tr>
+        <tr>
+          <td><strong>Escape Ratio</strong></td>
+          <td class="desc">≤ is better</td>
+          <td class="def">≤ 20%</td>
+          <td class="def">≤ 40%</td>
+          <td><span class="badge badge-teal">Release Health</span></td>
+        </tr>
+        <tr>
+          <td><strong>Defect Density</strong></td>
+          <td class="desc">≤ is better</td>
+          <td class="def">≤ 2</td>
+          <td class="def">≤ 5</td>
+          <td><span class="badge badge-red">Defects</span></td>
+        </tr>
+        <tr>
+          <td><strong>Health Score</strong></td>
+          <td class="desc">≥ is better</td>
+          <td class="def">≥ 70</td>
+          <td class="def">≥ 40</td>
+          <td><span class="badge badge-teal">Release Health</span><span class="badge badge-blue">Dashboard</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-blue">
+      ℹ️ Thresholds are global — they apply across all teams. Below the Amber threshold is always Red.
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       FIELD MAPPINGS
+  ══════════════════════════════════════════════════ -->
+  <div class="section" id="field-mappings">
+    <div class="section-title">🧭 TFS Field Mappings</div>
+    <p>Maps dashboard concepts to the actual TFS work item type names, custom field reference names, state values, and PI structure for your process template.</p>
+
+    <div class="callout callout-amber">
+      ⚠️ Saving Field Mappings flushes <strong>all</strong> cached API data so changes take effect immediately. Expect a brief reload of all charts after saving.
+    </div>
+
+    <h3>1. Work Item Types</h3>
+    <p>These are the exact TFS work item type names used in WIQL queries. All dashboard routes depend on these values.</p>
+
+    <table>
+      <thead><tr><th>Purpose</th><th>Description</th><th>Default</th><th>Impacts</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Feature</strong></td><td class="desc">PI-level delivery items</td><td class="def">Feature</td><td><span class="badge badge-blue">PI Delivery</span><span class="badge badge-purple">Features</span><span class="badge badge-blue">Executive</span></td></tr>
+        <tr><td><strong>Story</strong></td><td class="desc">Team-level backlog items</td><td class="def">Story</td><td><span class="badge badge-amber">Sprint</span><span class="badge badge-amber">Velocity</span></td></tr>
+        <tr><td><strong>Defect</strong></td><td class="desc">Bugs / defects</td><td class="def">Defect</td><td><span class="badge badge-red">Defects</span><span class="badge badge-teal">Release Health</span></td></tr>
+        <tr><td><strong>Objective</strong></td><td class="desc">PI Objectives</td><td class="def">Objective</td><td><span class="badge badge-blue">PI Delivery</span><span class="badge badge-blue">Executive</span></td></tr>
+        <tr><td><strong>Risk</strong></td><td class="desc">Programme risks</td><td class="def">Risk</td><td><span class="badge badge-amber">Risks</span></td></tr>
+        <tr><td><strong>Product Risk</strong></td><td class="desc">Product-level risks</td><td class="def">Product Risk</td><td><span class="badge badge-amber">Risks</span></td></tr>
+        <tr><td><strong>Test Case</strong></td><td class="desc">Test work items</td><td class="def">Test Case</td><td><span class="badge badge-teal">Test Coverage</span></td></tr>
+        <tr><td><strong>Epic</strong></td><td class="desc">Portfolio epics (parent of Features)</td><td class="def">Epic</td><td><span class="badge badge-purple">Features</span></td></tr>
+        <tr><td><strong>Task</strong></td><td class="desc">Development tasks</td><td class="def">Task</td><td><span class="badge badge-amber">Sprint</span><span class="badge badge-amber">Velocity</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>2. Custom Field Names</h3>
+    <p>TFS reference names (dot-notation) for custom fields. If your process template uses different field names, update these.</p>
+
+    <table>
+      <thead><tr><th>Field</th><th>Default Reference Name</th><th>Impacts</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Effort / Size</strong></td><td class="def">Microsoft.VSTS.Scheduling.Effort</td><td><span class="badge badge-amber">Velocity</span><span class="badge badge-blue">PI Delivery</span></td></tr>
+        <tr><td><strong>Story Points</strong></td><td class="def">Microsoft.VSTS.Scheduling.StoryPoints</td><td><span class="badge badge-amber">Velocity</span><span class="badge badge-amber">Sprint</span></td></tr>
+        <tr><td><strong>Release</strong></td><td class="def">Custom.Planning.Release</td><td><span class="badge badge-purple">Features</span><span class="badge badge-teal">Release Health</span></td></tr>
+        <tr><td><strong>Defect Classification</strong></td><td class="def">Custom.Defects.Classification</td><td><span class="badge badge-red">Defects</span></td></tr>
+        <tr><td><strong>Defect Project</strong></td><td class="def">Custom.Defects.Project</td><td><span class="badge badge-red">Defects</span></td></tr>
+        <tr><td><strong>How Found</strong></td><td class="def">Microsoft.VSTS.CMMI.HowFound</td><td><span class="badge badge-teal">Release Health</span></td></tr>
+        <tr><td><strong>Where Found</strong></td><td class="def">Custom.Defects.WhereFound</td><td><span class="badge badge-red">Defects</span></td></tr>
+        <tr><td><strong>Severity</strong></td><td class="def">Microsoft.VSTS.Common.Severity</td><td><span class="badge badge-red">Defects</span></td></tr>
+        <tr><td><strong>Rank / Priority</strong></td><td class="def">Custom.Rank</td><td><span class="badge badge-red">Defects</span></td></tr>
+        <tr><td><strong>Business Value</strong></td><td class="def">Microsoft.VSTS.Common.BusinessValue</td><td><span class="badge badge-blue">Executive</span></td></tr>
+        <tr><td><strong>Found In Build</strong></td><td class="def">Microsoft.VSTS.Build.FoundIn</td><td><span class="badge badge-teal">Release Health</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>3. State Values</h3>
+    <p>State string values exactly as they appear in TFS. Multi-value fields accept comma-separated lists.</p>
+
+    <table>
+      <thead><tr><th>Mapping</th><th>Type</th><th>Default</th><th>Impacts</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Feature Done State</strong></td><td class="desc">Single value</td><td class="def">Done</td><td><span class="badge badge-blue">PI Delivery</span><span class="badge badge-purple">Features</span></td></tr>
+        <tr><td><strong>Feature Removed State</strong></td><td class="desc">Single value</td><td class="def">Removed</td><td><span class="badge badge-blue">PI Delivery</span><span class="badge badge-purple">Features</span></td></tr>
+        <tr><td><strong>Feature WIP States</strong></td><td class="desc">Comma-separated</td><td class="def">Activated, Approved, In Progress, Active</td><td><span class="badge badge-blue">PI Delivery</span><span class="badge badge-purple">Features</span></td></tr>
+        <tr><td><strong>Feature All States</strong></td><td class="desc">Comma-separated</td><td class="def">Forecasted, New, Activated, Approved, Done, Removed</td><td><span class="badge badge-blue">PI Delivery</span><span class="badge badge-purple">Features</span></td></tr>
+        <tr><td><strong>Story Done States</strong></td><td class="desc">Comma-separated</td><td class="def">Done, Closed, Resolved, Completed</td><td><span class="badge badge-amber">Velocity</span><span class="badge badge-amber">Sprint</span></td></tr>
+        <tr><td><strong>Story Removed State</strong></td><td class="desc">Single value</td><td class="def">Removed</td><td><span class="badge badge-amber">Velocity</span></td></tr>
+        <tr><td><strong>Story WIP States</strong></td><td class="desc">Comma-separated</td><td class="def">Active, In Progress, Committed</td><td><span class="badge badge-amber">Sprint</span></td></tr>
+        <tr><td><strong>Defect Closed States</strong></td><td class="desc">Comma-separated</td><td class="def">Resolved, Closed</td><td><span class="badge badge-red">Defects</span><span class="badge badge-teal">Release Health</span></td></tr>
+        <tr><td><strong>Defect Removed State</strong></td><td class="desc">Single value</td><td class="def">Removed</td><td><span class="badge badge-red">Defects</span></td></tr>
+        <tr><td><strong>Enhancement Value</strong></td><td class="desc">Classification value to exclude from defect counts</td><td class="def">Enhancement</td><td><span class="badge badge-red">Defects</span></td></tr>
+        <tr><td><strong>Field Found Value</strong></td><td class="desc">HowFound value for escape ratio calculation</td><td class="def">Found In Field</td><td><span class="badge badge-teal">Release Health</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>4. PI Structure</h3>
+    <p>Defines how Programme Increments are structured — sprint cadence, naming, and capacity conversion.</p>
+
+    <table>
+      <thead><tr><th>Setting</th><th>Description</th><th>Default</th><th>Impacts</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Sprint Labels</strong></td>
+          <td class="desc">Comma-separated labels identifying sprints within a PI. Used to match iteration paths.</td>
+          <td class="def">S1, S2, S3, IP</td>
+          <td><span class="badge badge-blue">PI Delivery</span><span class="badge badge-amber">Velocity</span><span class="badge badge-amber">Sprint</span></td>
+        </tr>
+        <tr>
+          <td><strong>PIs Per Year</strong></td>
+          <td class="desc">Number of PIs per calendar year. Used for yearly comparisons and roadmap grouping.</td>
+          <td class="def">4</td>
+          <td><span class="badge badge-blue">Dashboard</span><span class="badge badge-blue">Compare</span><span class="badge badge-blue">Roadmap</span></td>
+        </tr>
+        <tr>
+          <td><strong>PI Naming Pattern</strong></td>
+          <td class="desc">Token pattern: <code>{yy}</code> = 2-digit year, <code>{n}</code> = PI number within year. Generates PI labels like <code>26-PI1</code>.</td>
+          <td class="def">{yy}-PI{n}</td>
+          <td><span class="badge badge-blue">Dashboard</span><span class="badge badge-blue">Roadmap</span></td>
+        </tr>
+        <tr>
+          <td><strong>Hours per Man-Day</strong></td>
+          <td class="desc">Used to convert Feature Effort (man-days) to hours for the Team Summary capacity chart. Adjust to match your team's working hours per day.</td>
+          <td class="def">6</td>
+          <td><span class="badge badge-purple">Features</span><span class="badge badge-blue">Team Summary</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-blue">
+      ℹ️ <strong>Hours per Man-Day:</strong> If Feature Effort = 10 (man-days) and Hours per Man-Day = 6, then total effort = 60 hours. This keeps the Story Points (hours) and Dev Capacity (hours) axes comparable in the Team Summary chart.
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       ROLES
+  ══════════════════════════════════════════════════ -->
+  <div class="section" id="roles">
+    <div class="section-title">👤 Roles</div>
+    <p>Manage custom role definitions. Roles control which pages and charts each user group can access. Defined roles appear in the Visibility tab for policy assignment.</p>
+
+    <table>
+      <thead><tr><th>Built-in Role</th><th>Access Level</th><th>Default Sections</th></tr></thead>
+      <tbody>
+        <tr><td><strong>all</strong></td><td class="desc">Default / unauthenticated</td><td class="desc">All sections visible</td></tr>
+        <tr><td><strong>exec</strong></td><td class="desc">Executive</td><td class="desc">Dashboard, PI Delivery, Objectives, Executive, Risks, Reports</td></tr>
+        <tr><td><strong>rte</strong></td><td class="desc">Release Train Engineer</td><td class="desc">All except Admin views</td></tr>
+        <tr><td><strong>pm</strong></td><td class="desc">Product Manager / PO</td><td class="desc">Features, PI Delivery, Objectives, Velocity, Reports</td></tr>
+        <tr><td><strong>sm</strong></td><td class="desc">Scrum Master</td><td class="desc">Sprint, Velocity, Defects, Features, Compare</td></tr>
+        <tr><td><strong>admin</strong></td><td class="desc">Administrator</td><td class="desc">Everything + Settings admin tabs</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-amber">
+      ⚠️ Admin-only Settings tabs (Azure AD, Role Mappings, Visibility) are only shown to users whose mapped role is included in the <strong>Admin Roles</strong> list.
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       NOTIFICATIONS
+  ══════════════════════════════════════════════════ -->
+  <div class="section" id="notifications">
+    <div class="section-title">🔔 Notifications</div>
+    <p>Configure automated digest messages and threshold-based alerts via MS Teams or Slack webhooks.</p>
+
+    <h3>Digest Webhook</h3>
+    <table>
+      <thead><tr><th>Field</th><th>Description</th><th>Default</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Webhook URL</strong></td><td class="desc">MS Teams or Slack incoming webhook URL. Stored server-side; never shown after saving.</td><td class="def">—</td></tr>
+        <tr><td><strong>Webhook Type</strong></td><td class="desc">Select Teams or Slack — controls message format.</td><td class="def">teams</td></tr>
+        <tr><td><strong>Enable Notifications</strong></td><td class="desc">Master on/off toggle.</td><td class="def">off</td></tr>
+        <tr><td><strong>Digest Schedule</strong></td><td class="desc">Day of week and hour (24h) for automatic weekly digest.</td><td class="def">Monday 09:00</td></tr>
+        <tr><td><strong>Digest Sections</strong></td><td class="desc">Choose which sections appear in the digest: Delivery, Quality, Forecast, Risks, Velocity.</td><td class="def">Delivery + Quality + Forecast</td></tr>
+        <tr><td><strong>Digest Title / Footer</strong></td><td class="desc">Custom text prepended/appended to the digest message.</td><td class="def">—</td></tr>
+        <tr><td><strong>Forecast Percentiles</strong></td><td class="desc">Which Monte Carlo percentiles to include (p50, p85, p95).</td><td class="def">p50</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Threshold Alerts</h3>
+    <p>Real-time alerts fired when a metric crosses a configured threshold. Each alert can target a different webhook URL.</p>
+    <table>
+      <thead><tr><th>Field</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Alert Webhook URL</strong></td><td class="desc">Separate webhook for immediate alerts. Can be different from the digest URL.</td></tr>
+        <tr><td><strong>Anomaly Threshold</strong></td><td class="desc">Multiplier applied to standard deviation for anomaly detection. Default 1.5×.</td></tr>
+        <tr><td><strong>Threshold Rules</strong></td><td class="desc">Add one rule per metric — choose metric, operator (above/below), and value.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Actions</h3>
+    <div class="step"><div class="step-num">1</div><div class="step-content"><strong>Send Test</strong> — sends a test message to the digest webhook immediately. Useful to verify the webhook URL is correct.</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><strong>Send Digest Now</strong> — triggers a full digest delivery outside of the scheduled time.</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-content"><strong>Check Thresholds Now</strong> — manually runs the threshold check and fires any matching alerts.</div></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       ADVANCED
+  ══════════════════════════════════════════════════ -->
+  <div class="section" id="advanced">
+    <div class="section-title">🛠 Advanced</div>
+    <p>Programme-level settings that affect data interpretation across all pages.</p>
+
+    <table>
+      <thead><tr><th>Setting</th><th>Description</th><th>Default</th><th>Impacts</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Programme Start Year</strong></td>
+          <td class="desc">Calendar year the programme began. Used to calculate PI numbers relative to the start of the programme. Set this to the first year of PI 1.</td>
+          <td class="def">Current year</td>
+          <td><span class="badge badge-blue">Dashboard</span><span class="badge badge-blue">Roadmap</span><span class="badge badge-blue">Compare</span></td>
+        </tr>
+        <tr>
+          <td><strong>Data Refresh Interval</strong></td>
+          <td class="desc">How often the server re-fetches data from TFS (minutes). Lower values provide fresher data but increase TFS query load.</td>
+          <td class="def">30 min</td>
+          <td><span class="badge badge-blue">All pages</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-amber">
+      ⚠️ Lowering the refresh interval below 5 minutes is not recommended for large TFS collections — it may cause rate limiting or degrade TFS performance.
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       AZURE AD
+  ══════════════════════════════════════════════════ -->
+  <div class="section" id="azure-ad">
+    <div class="section-title">☁️ Azure AD <span class="admin-banner">🔒 Admin Only</span></div>
+    <p>Configure OIDC / OAuth2 single sign-on via Microsoft Azure Active Directory. Only available to users with an admin role.</p>
+
+    <table>
+      <thead><tr><th>Field</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Tenant ID</strong></td><td class="desc">Azure AD Tenant ID (GUID) from the App Registration Overview page.</td></tr>
+        <tr><td><strong>Client ID</strong></td><td class="desc">Application (client) ID from the App Registration.</td></tr>
+        <tr><td><strong>Client Secret</strong></td><td class="desc">Secret generated in Certificates &amp; Secrets. Stored server-side only.</td></tr>
+        <tr><td><strong>Redirect URL</strong></td><td class="desc">OAuth2 callback URL. Must be registered in Azure AD as an allowed redirect URI. Format: <code>https://yourserver/auth/callback</code>.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-red">
+      🔴 <strong>Server restart required</strong> after saving Azure AD settings. The OIDC client is initialized at startup and must be restarted to pick up the new credentials.
+    </div>
+
+    <h3>Azure AD App Registration Steps</h3>
+    <div class="step"><div class="step-num">1</div><div class="step-content"><strong>Azure Portal → App registrations → New registration</strong> — name the app "AV Dashboard".</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><strong>Authentication → Add platform → Web</strong> — enter the Redirect URL (must match exactly).</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-content"><strong>Certificates &amp; secrets → New client secret</strong> — copy the value immediately (shown once).</div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-content"><strong>Token configuration → Add groups claim</strong> — select "Security groups" so group memberships are available for role mapping.</div></div>
+    <div class="step"><div class="step-num">5</div><div class="step-content"><strong>Paste Tenant ID, Client ID, Client Secret, and Redirect URL</strong> into Settings → Azure AD, then Save and restart the server.</div></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       ROLE MAPPINGS
+  ══════════════════════════════════════════════════ -->
+  <div class="section" id="role-mappings">
+    <div class="section-title">🗝 Role Mappings <span class="admin-banner">🔒 Admin Only</span></div>
+    <p>Maps Azure AD identities (groups, emails, or UPN patterns) to dashboard roles. Evaluated in order — first match wins.</p>
+
+    <table>
+      <thead><tr><th>Concept</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Match Type</strong></td><td class="desc">Group (Azure AD Group Object ID), Email (exact match), or Pattern (regex/wildcard on UPN/email).</td></tr>
+        <tr><td><strong>Match Value</strong></td><td class="desc">Azure AD Group GUID, email address, or pattern string.</td></tr>
+        <tr><td><strong>Role</strong></td><td class="desc">Dashboard role to assign: exec, rte, pm, sm, admin.</td></tr>
+        <tr><td><strong>Admin Roles</strong></td><td class="desc">Comma-separated list of role names that get access to admin-only Settings tabs.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-blue">
+      ℹ️ Users with no matching role mapping are assigned the <code>all</code> role (read-only, all sections visible). Add a catch-all mapping at the bottom if you want authenticated users to default to a specific role.
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       VISIBILITY POLICIES
+  ══════════════════════════════════════════════════ -->
+  <div class="section" id="visibility">
+    <div class="section-title">🛡 Visibility Policies <span class="admin-banner">🔒 Admin Only</span></div>
+    <p>Fine-grained control over what each role can see. Policies hide pages, tabs, and individual chart cards without removing them from the codebase.</p>
+
+    <h3>How It Works</h3>
+    <div class="step"><div class="step-num">1</div><div class="step-content"><strong>Select a role</strong> from the role picker (All, Exec, RTE, PM, SM, Admin).</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><strong>Each section card</strong> shows its current visibility status. Click <strong>✓ Visible / ⊘ Hidden</strong> to toggle the entire section for that role.</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-content"><strong>Expand ▼</strong> a section card to see individual tabs (📑) and charts (📊) as toggleable chips.</div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-content"><strong>Save Policies</strong> — changes take effect on the next page load for users of that role.</div></div>
+
+    <h3>Policy Sections &amp; Charts</h3>
+    <table>
+      <thead><tr><th>Section</th><th>Tabs</th><th>Charts / Cards</th><th>Default Roles</th></tr></thead>
+      <tbody>
+        <tr><td><strong>PI Delivery</strong></td><td class="desc">Overview, Features, Risks, Objectives, Inspect &amp; Adapt</td><td class="desc">KPI Strip, Feature Burndown, Feature State Dist, Objective Completion, Risk Heatmap</td><td><span class="badge badge-green">All roles</span></td></tr>
+        <tr><td><strong>Features</strong></td><td class="desc">PI Summary, Cycle Time, Team Summary</td><td class="desc">Inconsistency cards, Cycle Time Distribution, Team Summary chart</td><td><span class="badge badge-green">All roles</span></td></tr>
+        <tr><td><strong>Sprint</strong></td><td class="desc">Burndown, Board, Team Capacity</td><td class="desc">Burndown chart, Team capacity bars</td><td><span class="badge badge-green">All roles</span></td></tr>
+        <tr><td><strong>Velocity</strong></td><td class="desc">Velocity, Forecast</td><td class="desc">Velocity chart, Monte Carlo forecast</td><td><span class="badge badge-green">All roles</span></td></tr>
+        <tr><td><strong>Defects</strong></td><td class="desc">Overview, By Team, Trends</td><td class="desc">Defect trend, Escape ratio, Classification chart</td><td><span class="badge badge-green">All roles</span></td></tr>
+        <tr><td><strong>Objectives Planning</strong></td><td class="desc">—</td><td class="desc">KPI Strip, Objectives List</td><td><span class="badge badge-blue">Exec</span><span class="badge badge-blue">RTE</span><span class="badge badge-blue">PM</span></td></tr>
+        <tr><td><strong>Executive</strong></td><td class="desc">—</td><td class="desc">Executive summary cards</td><td><span class="badge badge-blue">Exec</span><span class="badge badge-blue">RTE</span></td></tr>
+        <tr><td><strong>Compare</strong></td><td class="desc">—</td><td class="desc">PI-to-PI comparison chart</td><td><span class="badge badge-green">All roles</span></td></tr>
+        <tr><td><strong>Scope Change</strong></td><td class="desc">—</td><td class="desc">Scope Points Comparison, Change Breakdown, Change Detail Table</td><td><span class="badge badge-blue">All</span><span class="badge badge-blue">Exec</span><span class="badge badge-blue">RTE</span><span class="badge badge-blue">PM</span></td></tr>
+        <tr><td><strong>Reports</strong></td><td class="desc">—</td><td class="desc">Inconsistency report tables</td><td><span class="badge badge-green">All roles</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       DEFAULT VALUES
+  ══════════════════════════════════════════════════ -->
+  <div class="section" id="defaults">
+    <div class="section-title">📋 Default Values Quick Reference</div>
+
+    <table>
+      <thead><tr><th>Setting</th><th>Default Value</th></tr></thead>
+      <tbody>
+        <tr><td>Feature WIP States</td><td class="def">Activated, Approved, In Progress, Active</td></tr>
+        <tr><td>Feature All States</td><td class="def">Forecasted, New, Activated, Approved, Done, Removed</td></tr>
+        <tr><td>Story Done States</td><td class="def">Done, Closed, Resolved, Completed</td></tr>
+        <tr><td>Story WIP States</td><td class="def">Active, In Progress, Committed</td></tr>
+        <tr><td>Defect Closed States</td><td class="def">Resolved, Closed</td></tr>
+        <tr><td>Sprint Labels</td><td class="def">S1, S2, S3, IP</td></tr>
+        <tr><td>PIs Per Year</td><td class="def">4</td></tr>
+        <tr><td>PI Naming Pattern</td><td class="def">{yy}-PI{n}</td></tr>
+        <tr><td>Hours per Man-Day</td><td class="def">6</td></tr>
+        <tr><td>RAG Done Rate (Green)</td><td class="def">≥ 80%</td></tr>
+        <tr><td>RAG Done Rate (Amber)</td><td class="def">≥ 50%</td></tr>
+        <tr><td>RAG Escape Ratio (Green)</td><td class="def">≤ 20%</td></tr>
+        <tr><td>RAG Health Score (Green)</td><td class="def">≥ 70</td></tr>
+        <tr><td>Data Refresh Interval</td><td class="def">30 min</td></tr>
+        <tr><td>Anomaly Threshold</td><td class="def">1.5×</td></tr>
+        <tr><td>Primary Color</td><td class="def">#1492ff</td></tr>
+        <tr><td>Notification Webhook Type</td><td class="def">teams</td></tr>
+        <tr><td>Digest Schedule</td><td class="def">Monday 09:00</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       CONFIG.JSON SCHEMA
+  ══════════════════════════════════════════════════ -->
+  <div class="section" id="config-file">
+    <div class="section-title">📄 config.json Schema</div>
+    <p>All settings are persisted in <code>config.json</code> at the project root. The file is created automatically on first save. Below is the full schema with defaults.</p>
+
+    <div class="code-block">
+<pre><span class="prop">{</span>
+  <span class="str">"tfs"</span>: {
+    <span class="str">"baseUrl"</span>:       <span class="str">"https://tfs.company.com/tfs/Collection"</span>,
+    <span class="str">"pat"</span>:           <span class="str">"&lt;encrypted-or-plain-PAT&gt;"</span>,
+    <span class="str">"areaPath"</span>:      <span class="str">"Healthcare IT\\ICAP\\ISP"</span>,
+    <span class="str">"teamRootPath"</span>:  [<span class="str">"Healthcare IT\\ICAP\\ISP\\Hercules"</span>],
+    <span class="str">"iterationPath"</span>: <span class="str">"Healthcare IT\\ICAP\\ISP"</span>
+  },
+  <span class="str">"branding"</span>: {
+    <span class="str">"companyName"</span>:  <span class="str">"AV Dashboard"</span>,
+    <span class="str">"appName"</span>:      <span class="str">"AV Dashboard"</span>,
+    <span class="str">"appSubtitle"</span>:  <span class="str">"ISP Programme"</span>,
+    <span class="str">"logoType"</span>:     <span class="str">"text"</span>,
+    <span class="str">"logoUrl"</span>:      <span class="str">""</span>,
+    <span class="str">"logoSvg"</span>:      <span class="str">""</span>,
+    <span class="str">"primaryColor"</span>: <span class="str">"#1492ff"</span>
+  },
+  <span class="str">"ragThresholds"</span>: {
+    <span class="str">"doneRate"</span>:      { <span class="str">"green"</span>: <span class="num">80</span>,  <span class="str">"amber"</span>: <span class="num">50</span> },
+    <span class="str">"resolveRate"</span>:  { <span class="str">"green"</span>: <span class="num">70</span>,  <span class="str">"amber"</span>: <span class="num">40</span> },
+    <span class="str">"escapeRatio"</span>:  { <span class="str">"green"</span>: <span class="num">20</span>,  <span class="str">"amber"</span>: <span class="num">40</span> },
+    <span class="str">"defectDensity"</span>:{ <span class="str">"green"</span>: <span class="num">2</span>,   <span class="str">"amber"</span>: <span class="num">5</span>  },
+    <span class="str">"healthScore"</span>:  { <span class="str">"green"</span>: <span class="num">70</span>,  <span class="str">"amber"</span>: <span class="num">40</span> }
+  },
+  <span class="str">"fieldMappings"</span>: {
+    <span class="str">"workItemTypes"</span>: {
+      <span class="str">"feature"</span>: <span class="str">"Feature"</span>, <span class="str">"story"</span>: <span class="str">"Story"</span>, <span class="str">"defect"</span>: <span class="str">"Defect"</span>,
+      <span class="str">"objective"</span>: <span class="str">"Objective"</span>, <span class="str">"risk"</span>: <span class="str">"Risk"</span>, <span class="str">"productRisk"</span>: <span class="str">"Product Risk"</span>,
+      <span class="str">"testCase"</span>: <span class="str">"Test Case"</span>, <span class="str">"epic"</span>: <span class="str">"Epic"</span>, <span class="str">"task"</span>: <span class="str">"Task"</span>
+    },
+    <span class="str">"fields"</span>: {
+      <span class="str">"effortField"</span>:               <span class="str">"Microsoft.VSTS.Scheduling.Effort"</span>,
+      <span class="str">"storyPointsField"</span>:          <span class="str">"Microsoft.VSTS.Scheduling.StoryPoints"</span>,
+      <span class="str">"releaseField"</span>:              <span class="str">"Custom.Planning.Release"</span>,
+      <span class="str">"defectClassificationField"</span>: <span class="str">"Custom.Defects.Classification"</span>,
+      <span class="str">"severityField"</span>:             <span class="str">"Microsoft.VSTS.Common.Severity"</span>,
+      <span class="str">"businessValueField"</span>:        <span class="str">"Microsoft.VSTS.Common.BusinessValue"</span>
+    },
+    <span class="str">"stateValues"</span>: {
+      <span class="str">"featureDone"</span>:     <span class="str">"Done"</span>,
+      <span class="str">"featureRemoved"</span>:  <span class="str">"Removed"</span>,
+      <span class="str">"featureWip"</span>:      [<span class="str">"Activated"</span>, <span class="str">"Approved"</span>, <span class="str">"In Progress"</span>, <span class="str">"Active"</span>],
+      <span class="str">"featureAllStates"</span>:[<span class="str">"Forecasted"</span>, <span class="str">"New"</span>, <span class="str">"Activated"</span>, <span class="str">"Approved"</span>, <span class="str">"Done"</span>, <span class="str">"Removed"</span>],
+      <span class="str">"storyDone"</span>:       [<span class="str">"Done"</span>, <span class="str">"Closed"</span>, <span class="str">"Resolved"</span>, <span class="str">"Completed"</span>],
+      <span class="str">"storyWip"</span>:        [<span class="str">"Active"</span>, <span class="str">"In Progress"</span>, <span class="str">"Committed"</span>],
+      <span class="str">"defectClosed"</span>:    [<span class="str">"Resolved"</span>, <span class="str">"Closed"</span>]
+    },
+    <span class="str">"piStructure"</span>: {
+      <span class="str">"sprintLabels"</span>:    [<span class="str">"S1"</span>, <span class="str">"S2"</span>, <span class="str">"S3"</span>, <span class="str">"IP"</span>],
+      <span class="str">"pisPerYear"</span>:      <span class="num">4</span>,
+      <span class="str">"piNamingPattern"</span>: <span class="str">"{yy}-PI{n}"</span>,
+      <span class="str">"hoursPerPoint"</span>:   <span class="num">6</span>
+    }
+  },
+  <span class="str">"app"</span>: {
+    <span class="str">"programmeStartYear"</span>:     <span class="num">2025</span>,
+    <span class="str">"refreshIntervalMinutes"</span>: <span class="num">30</span>
+  },
+  <span class="str">"azureAd"</span>: {
+    <span class="str">"tenantId"</span>: <span class="str">""</span>, <span class="str">"clientId"</span>: <span class="str">""</span>,
+    <span class="str">"clientSecret"</span>: <span class="str">""</span>, <span class="str">"redirectUrl"</span>: <span class="str">""</span>
+  },
+  <span class="str">"roleMappings"</span>: [],
+  <span class="str">"adminRoles"</span>: [<span class="str">"admin"</span>],
+  <span class="str">"policies"</span>: {
+    <span class="str">"exec"</span>: { <span class="str">"hiddenPages"</span>: [], <span class="str">"hiddenTabs"</span>: [], <span class="str">"hiddenCharts"</span>: [] }
+  },
+  <span class="str">"notifications"</span>: {
+    <span class="str">"enabled"</span>: <span class="kw">false</span>,
+    <span class="str">"webhookType"</span>: <span class="str">"teams"</span>,
+    <span class="str">"digestSchedule"</span>: { <span class="str">"day"</span>: <span class="str">"monday"</span>, <span class="str">"hour"</span>: <span class="num">9</span>, <span class="str">"minute"</span>: <span class="num">0</span> },
+    <span class="str">"anomalyThreshold"</span>: <span class="num">1.5</span>
+  }
+<span class="prop">}</span></pre>
+    </div>
+
+    <div class="callout callout-amber">
+      ⚠️ Do not edit <code>config.json</code> manually while the server is running — changes may be overwritten. Use the Settings UI, then restart if necessary.
+    </div>
+  </div>
+
+  <div style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);text-align:center;color:var(--muted);font-size:12px;">
+    AV Dashboard v2.2 · Settings &amp; Configuration Guide · Your Organisation ICAP ISP
+  </div>
+
+</main>
+
+</body>
+</html>
+

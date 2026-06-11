@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ADO 2021 Upgrade Guide · AV Dashboard</title>
+<style>
+  :root {
+    --bg:#141414; --surface:#1e1e1e; --surface2:#2b2b2b; --surface3:#333;
+    --border:#3a3a3a; --primary:#1492ff; --success:#068443;
+    --amber:#e8a217; --danger:#eb3f3f; --purple:#a78bfa; --teal:#21837c;
+    --muted:#adadad; --muted2:#888; --text:#e8e8e8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;line-height:1.6;}
+
+  /* ── Layout ── */
+  .app{display:flex;min-height:100vh;}
+  .sidenav{width:240px;flex-shrink:0;background:#111;border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:0 0 40px;}
+  .main{flex:1;padding:40px 52px;max-width:980px;}
+
+  /* ── Sidenav ── */
+  .sidenav-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border);}
+  .sidenav-logo .title{font-size:13px;font-weight:700;color:#fff;line-height:1.4;}
+  .sidenav-logo .sub{font-size:11px;color:var(--muted);margin-top:3px;}
+  .sidenav-logo .badge{display:inline-block;margin-top:8px;font-size:10px;font-weight:700;
+    background:rgba(20,146,255,.15);color:var(--primary);border:1px solid rgba(20,146,255,.3);padding:2px 9px;}
+  .nav-section{padding:16px 14px 6px;font-size:10px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.1em;color:var(--muted2);}
+  .nav-item{display:flex;align-items:center;gap:9px;padding:8px 18px;cursor:pointer;
+    font-size:13px;color:var(--muted);border-left:2px solid transparent;transition:all .15s;text-decoration:none;}
+  .nav-item:hover{color:#fff;background:#1a1a1a;}
+  .nav-item.active{color:#fff;border-left-color:var(--primary);background:#0d1e33;}
+  .nav-item .icon{font-size:14px;flex-shrink:0;}
+  .nav-divider{margin:8px 16px;border:none;border-top:1px solid var(--border);}
+
+  /* ── Page header ── */
+  .page-header{display:flex;align-items:flex-start;gap:16px;padding-bottom:24px;margin-bottom:32px;border-bottom:2px solid var(--primary);}
+  .ph-icon{font-size:42px;line-height:1;}
+  .ph-title{font-size:26px;font-weight:700;color:#fff;margin-bottom:4px;}
+  .ph-sub{font-size:13px;color:var(--muted);margin-bottom:10px;}
+  .ph-meta{display:flex;gap:10px;flex-wrap:wrap;}
+  .ph-chip{font-size:11px;padding:3px 10px;border:1px solid var(--border);color:var(--muted);background:var(--surface2);}
+  .ph-chip b{color:#fff;}
+
+  /* ── Section titles ── */
+  .sec{margin-bottom:32px;}
+  .sec-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+    margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+  .sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
+  .sec-title.blue{color:var(--primary);}
+  .sec-title.green{color:var(--success);}
+  .sec-title.amber{color:var(--amber);}
+  .sec-title.red{color:var(--danger);}
+  .sec-title.purple{color:var(--purple);}
+  .sec-title.teal{color:var(--teal);}
+
+  /* ── KPI strip ── */
+  .kpi-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:28px;}
+  .kpi-card{background:var(--surface2);border:1px solid var(--border);padding:14px 16px;text-align:center;}
+  .kpi-val{font-size:26px;font-weight:700;line-height:1;}
+  .kpi-label{font-size:10.5px;color:var(--muted);margin-top:5px;text-transform:uppercase;letter-spacing:.05em;}
+
+  /* ── Table ── */
+  .card{background:var(--surface2);border:1px solid var(--border);margin-bottom:14px;overflow:hidden;}
+  .card-head{padding:10px 14px;background:var(--surface3);border-bottom:1px solid var(--border);
+    font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:8px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead tr{background:#222;}
+  th{padding:9px 13px;text-align:left;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:1px solid var(--border);}
+  td{padding:9px 13px;border-bottom:1px solid #2a2a2a;vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:#252525;}
+  code{font-family:'Consolas',monospace;font-size:12px;background:#1a1a1a;padding:1px 6px;color:#9cdcfe;border:1px solid #333;}
+
+  /* ── Tags ── */
+  .tag{display:inline-block;padding:2px 8px;font-size:11px;font-weight:600;border:1px solid;}
+  .tag-none{color:#068443;border-color:#06844366;background:#06844311;}
+  .tag-low{color:#1492ff;border-color:#1492ff66;background:#1492ff11;}
+  .tag-med{color:#e8a217;border-color:#e8a21766;background:#e8a21711;}
+  .tag-high{color:#eb3f3f;border-color:#eb3f3f66;background:#eb3f3f11;}
+  .tag-info{color:#a78bfa;border-color:#a78bfa66;background:#a78bfa11;}
+  .tag-action{color:#fb923c;border-color:#fb923c66;background:#fb923c11;}
+
+  /* ── Notes ── */
+  .note{padding:12px 16px;font-size:13px;border-left:3px solid;margin-bottom:12px;}
+  .note.green{background:#1a2a1a;border-color:var(--success);color:#aaccaa;}
+  .note.amber{background:#2a1f0a;border-color:var(--amber);color:#ccb080;}
+  .note.blue{background:#0d1e33;border-color:var(--primary);color:#7bbfff;}
+  .note.red{background:#2a1010;border-color:var(--danger);color:#f09090;}
+  .note strong{color:#fff;}
+
+  /* ── Checklist ── */
+  .checklist{list-style:none;padding:0;}
+  .checklist li{display:flex;align-items:flex-start;gap:10px;padding:9px 14px;
+    border-bottom:1px solid var(--border);font-size:13px;}
+  .checklist li:last-child{border-bottom:none;}
+  .checklist li::before{content:'☐';font-size:15px;color:var(--muted);flex-shrink:0;margin-top:1px;}
+  .checklist li b{color:#fff;}
+  .checklist li .sub{font-size:11px;color:var(--muted2);margin-top:2px;}
+
+  /* ── Step cards ── */
+  .steps{display:flex;flex-direction:column;gap:10px;}
+  .step{background:var(--surface2);border:1px solid var(--border);padding:14px 16px;display:flex;gap:14px;align-items:flex-start;}
+  .step-num{width:28px;height:28px;background:var(--primary);color:#fff;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+  .step-body .step-title{font-weight:700;color:#fff;font-size:13px;margin-bottom:4px;}
+  .step-body .step-desc{font-size:12.5px;color:var(--muted);line-height:1.6;}
+
+  /* ── Code block ── */
+  .cb{background:#0d0d0d;border:1px solid var(--border);border-left:3px solid var(--primary);
+    padding:14px 16px;font-family:'Consolas','Cascadia Code','Courier New',monospace;
+    font-size:12.5px;line-height:1.75;white-space:pre;overflow-x:auto;color:#d4d4d4;margin-bottom:12px;}
+  .cb.green{border-left-color:var(--success);}
+  .cb.amber{border-left-color:var(--amber);}
+  .kw{color:#569cd6;} .field{color:#9cdcfe;} .str{color:#ce9178;} .cmt{color:#6a9955;font-style:italic;}
+
+  /* ── Back link ── */
+  .back-link{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);
+    text-decoration:none;margin-bottom:24px;padding:5px 12px;border:1px solid var(--border);background:var(--surface2);}
+  .back-link:hover{color:#fff;border-color:var(--primary);}
+
+  @media(max-width:860px){
+    .sidenav{display:none;}
+    .main{padding:24px 20px;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── Sidebar ── -->
+  <nav class="sidenav">
+    <div class="sidenav-logo">
+      <div class="title">AV Dashboard</div>
+      <div class="sub">Healthcare IT · ICAP · ISP</div>
+      <div class="badge">Migration Guide</div>
+    </div>
+
+    <div class="nav-section">On This Page</div>
+    <a class="nav-item" href="#overview"><span class="icon">📋</span>Overview</a>
+    <a class="nav-item" href="#summary"><span class="icon">📊</span>Impact Summary</a>
+    <a class="nav-item" href="#config-changes"><span class="icon">⚙️</span>Config Changes</a>
+    <a class="nav-item" href="#verify"><span class="icon">🔍</span>What to Verify</a>
+    <a class="nav-item" href="#zero-risk"><span class="icon">✅</span>Zero Risk Items</a>
+    <a class="nav-item" href="#checklist"><span class="icon">☑️</span>Migration Checklist</a>
+    <a class="nav-item" href="#config-snippet"><span class="icon">📝</span>Config Snippet</a>
+    <a class="nav-item" href="#troubleshooting"><span class="icon">🛠</span>Troubleshooting</a>
+
+    <hr class="nav-divider">
+    <div class="nav-section">Docs</div>
+    <a class="nav-item" href="index.html"><span class="icon">🏠</span>Doc Hub</a>
+    <a class="nav-item" href="settings-guide.html"><span class="icon">⚙️</span>Settings Guide</a>
+    <a class="nav-item" href="implementation.html"><span class="icon">🔧</span>Implementation</a>
+    <a class="nav-item" href="user-manual.html"><span class="icon">📖</span>User Manual</a>
+  </nav>
+
+  <!-- ── Main ── -->
+  <main class="main">
+    <a class="back-link" href="index.html">← Back to Doc Hub</a>
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="ph-icon">🚀</div>
+      <div>
+        <div class="ph-title">Azure DevOps Server 2021 — Upgrade Impact Guide</div>
+        <div class="ph-sub">What changes, what stays the same, and what to do after migration</div>
+        <div class="ph-meta">
+          <span class="ph-chip"><b>Current:</b> TFS 2018 / API v5.0</span>
+          <span class="ph-chip"><b>Target:</b> ADO Server 2021 / API v6.0</span>
+          <span class="ph-chip"><b>Dashboard:</b> AV Dashboard v2.2</span>
+          <span class="ph-chip"><b>Date:</b> May 2026</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI Strip -->
+    <div class="kpi-strip">
+      <div class="kpi-card">
+        <div class="kpi-val" style="color:var(--success);">0</div>
+        <div class="kpi-label">Code Changes Required</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-val" style="color:var(--amber);">3</div>
+        <div class="kpi-label">Config Values to Update</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-val" style="color:var(--amber);">5</div>
+        <div class="kpi-label">Items to Verify</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-val" style="color:var(--success);">7</div>
+        <div class="kpi-label">Zero-Risk Items</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-val" style="color:var(--primary);">~1h</div>
+        <div class="kpi-label">Estimated Migration Time</div>
+      </div>
+    </div>
+
+    <!-- Overview -->
+    <div class="sec" id="overview">
+      <div class="sec-title blue">Overview</div>
+      <div class="note blue">
+        <strong>Good news:</strong> The AV Dashboard is well-architected for this migration. Every API call reads
+        <code>baseUrl</code>, <code>apiVersion</code>, and <code>pat</code> from <code>config.json</code> at runtime —
+        nothing is hardcoded. The migration is essentially a <strong>config-only change</strong>.
+      </div>
+      <div class="note amber">
+        <strong>PAT required:</strong> Personal Access Tokens do <em>not</em> migrate from TFS to ADO Server 2021.
+        You must generate a new PAT in the new server and update <code>config.json</code> before the dashboard will connect.
+      </div>
+    </div>
+
+    <!-- Impact Summary Table -->
+    <div class="sec" id="summary">
+      <div class="sec-title blue">Impact Summary</div>
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Area</th>
+              <th>Impact</th>
+              <th>Action Required</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Server URL</b> (<code>tfs.baseUrl</code>)</td>
+              <td><span class="tag tag-med">Medium</span></td>
+              <td>Update if server hostname changes. On-prem URL pattern is identical: <code>https://&lt;server&gt;/tfs/&lt;Collection&gt;/&lt;Project&gt;</code></td>
+            </tr>
+            <tr>
+              <td><b>Personal Access Token</b> (<code>tfs.pat</code>)</td>
+              <td><span class="tag tag-high">Required</span></td>
+              <td>Generate new PAT in ADO Server 2021 — old PATs do not carry over</td>
+            </tr>
+            <tr>
+              <td><b>API Version</b> (<code>tfs.apiVersion</code>)</td>
+              <td><span class="tag tag-low">Low</span></td>
+              <td>Update from <code>5.0</code> → <code>6.0</code>. Both work; 6.0 unlocks new response fields</td>
+            </tr>
+            <tr>
+              <td><b>Custom Fields</b></td>
+              <td><span class="tag tag-med">Verify</span></td>
+              <td>Confirm <code>Custom.Defects.*</code>, <code>Custom.Planning.Release</code>, etc. migrated with same names</td>
+            </tr>
+            <tr>
+              <td><b>Work Item Types</b></td>
+              <td><span class="tag tag-low">Low</span></td>
+              <td>Verify Feature, Defect, Objective, Story types still exist with same names in process template</td>
+            </tr>
+            <tr>
+              <td><b>Saved TFS Queries</b></td>
+              <td><span class="tag tag-med">Verify</span></td>
+              <td>PI Checks uses query paths like <code>Shared Queries/ICAP/Program Queries</code> — verify paths still exist and query IDs didn't change</td>
+            </tr>
+            <tr>
+              <td><b>Test Runs</b> (<code>/_apis/test/runs</code>)</td>
+              <td><span class="tag tag-med">Verify</span></td>
+              <td>Test Coverage section may show empty until test run history is confirmed migrated</td>
+            </tr>
+            <tr>
+              <td><b>WIQL Query Syntax</b></td>
+              <td><span class="tag tag-none">None</span></td>
+              <td>Fully backward compatible — no changes needed</td>
+            </tr>
+            <tr>
+              <td><b>REST API endpoints</b> (<code>_apis/wit/*</code>)</td>
+              <td><span class="tag tag-none">None</span></td>
+              <td>All endpoints used by dashboard exist in ADO Server 2021</td>
+            </tr>
+            <tr>
+              <td><b>PAT Authentication (Basic Auth)</b></td>
+              <td><span class="tag tag-none">None</span></td>
+              <td>Same mechanism — <code>Authorization: Basic base64(:PAT)</code></td>
+            </tr>
+            <tr>
+              <td><b>Work Item deep links</b> (<code>/_workitems/edit/{id}</code>)</td>
+              <td><span class="tag tag-none">None</span></td>
+              <td>URL pattern unchanged in ADO Server 2021</td>
+            </tr>
+            <tr>
+              <td><b>Iteration / Area path structure</b></td>
+              <td><span class="tag tag-none">None</span></td>
+              <td>Classification nodes API (<code>_apis/wit/classificationnodes</code>) is unchanged</td>
+            </tr>
+            <tr>
+              <td><b>Snapshots folder</b></td>
+              <td><span class="tag tag-none">None</span></td>
+              <td>Local JSON files — completely unaffected by server migration</td>
+            </tr>
+            <tr>
+              <td><b>Team capacity endpoints</b></td>
+              <td><span class="tag tag-none">None</span></td>
+              <td><code>_apis/work/teamsettings/iterations</code> and <code>capacities</code> — unchanged</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Config Changes -->
+    <div class="sec" id="config-changes">
+      <div class="sec-title amber">Config Changes Required</div>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">
+        Open <code>config.json</code> in the dashboard root directory and update the following three values:
+      </p>
+      <div class="card">
+        <table>
+          <thead>
+            <tr><th>Key</th><th>Before</th><th>After</th><th>Notes</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>tfs.baseUrl</code></td>
+              <td><code style="color:#ce9178;">https://tfs.yourorg.com/tfs/YourOrg/YourProject</code></td>
+              <td><code style="color:#9cdcfe;">&lt;new ADO Server URL&gt;</code></td>
+              <td>Same format: <code>https://&lt;host&gt;/tfs/&lt;Collection&gt;/&lt;Project&gt;</code></td>
+            </tr>
+            <tr>
+              <td><code>tfs.pat</code></td>
+              <td><code style="color:#6a9955;font-style:italic;">&lt;old PAT&gt;</code></td>
+              <td><code style="color:#9cdcfe;">&lt;new PAT from ADO 2021&gt;</code></td>
+              <td>Generate in ADO Server 2021 → User Settings → Personal Access Tokens</td>
+            </tr>
+            <tr>
+              <td><code>tfs.apiVersion</code></td>
+              <td><code style="color:#ce9178;">5.0</code></td>
+              <td><code style="color:#9cdcfe;">6.0</code></td>
+              <td>Optional but recommended — enables newer response features</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note green" style="margin-top:4px;">
+        <strong>Tip:</strong> After updating config.json, use the dashboard's built-in <strong>Settings page → TFS Connection</strong> tab and click <strong>Test Connection</strong> to validate before opening the full dashboard.
+      </div>
+    </div>
+
+    <!-- What to Verify -->
+    <div class="sec" id="verify">
+      <div class="sec-title amber">Items to Verify After Migration</div>
+
+      <div class="card" style="margin-bottom:12px;">
+        <div class="card-head">🔬 Custom Fields</div>
+        <div style="padding:14px 16px;">
+          <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">
+            These custom org fields must exist with identical names in the migrated process template.
+            Open any Feature or Defect in ADO Server 2021 and confirm these fields are present:
+          </p>
+          <div class="card">
+            <table>
+              <thead><tr><th>Field Name</th><th>Used In</th><th>Dashboard Section</th></tr></thead>
+              <tbody>
+                <tr><td><code>Custom.Planning.Release</code></td><td>Features, Stories</td><td>Features, Sprint, PI Checks</td></tr>
+                <tr><td><code>Custom.Defects.Classification</code></td><td>Defects</td><td>Quality — filters out Enhancements</td></tr>
+                <tr><td><code>Custom.Defects.Project</code></td><td>Defects</td><td>Quality — Field Defects by Project</td></tr>
+                <tr><td><code>Custom.Defects.FixedPlannedVersion</code></td><td>Defects</td><td>Quality — Versions tab</td></tr>
+                <tr><td><code>Custom.Defects.WhereFound</code></td><td>Defects</td><td>Quality — Analysis tab</td></tr>
+                <tr><td><code>Custom.Generic04</code></td><td>Defects</td><td>Resolve-by date (SLA breach)</td></tr>
+                <tr><td><code>Custom.Rank</code></td><td>Defects</td><td>Severity / ranking charts</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="note amber" style="margin-top:10px;">
+            <strong>If a field is missing:</strong> The dashboard's <code>fetchWorkItemDetails</code> function has automatic field-stripping fallback — it will log a warning and retry without the unknown field. The section will still load, but that column will be blank.
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:12px;">
+        <div class="card-head">📂 Saved Query Paths (PI Checks)</div>
+        <div style="padding:14px 16px;font-size:13px;color:var(--muted);">
+          <p style="margin-bottom:10px;">The <strong>PI Checks</strong> section fetches queries from a fixed folder path in TFS Shared Queries.
+          After migration, verify this path still exists:</p>
+          <div class="cb">Shared Queries / ICAP / Program Queries / TFSInconsistenciesQueryRepository</div>
+          <p>If the path changed, update it in <strong>Settings → PI Checks</strong> → Query Folder Path.</p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:12px;">
+        <div class="card-head">🧪 Test Coverage Section</div>
+        <div style="padding:14px 16px;font-size:13px;color:var(--muted);">
+          The Test Coverage section calls <code>/_apis/test/runs</code>. Test run history may not be fully migrated.
+          Load the <strong>Test Coverage</strong> tab and verify data appears. If empty, test runs may need to be re-executed
+          against the new server.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">🔤 Work Item Type Names</div>
+        <div style="padding:14px 16px;font-size:13px;color:var(--muted);">
+          <p style="margin-bottom:10px;">These work item type names are configured in <strong>Settings → Field Mappings</strong>.
+          Verify the process template in ADO 2021 uses the same names:</p>
+          <div class="cb">Feature · Story · Defect · Objective · Risk · Product Risk · Test Case · Epic · Task</div>
+          <p>If any were renamed during migration, update them in the Settings page.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Zero Risk -->
+    <div class="sec" id="zero-risk">
+      <div class="sec-title green">Zero Risk — No Changes Needed</div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Feature / Endpoint</th><th>Why It's Safe</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>WIQL query syntax</td>
+              <td>ADO Server 2021 is fully backward compatible with all WIQL used in the dashboard</td>
+            </tr>
+            <tr>
+              <td><code>/_apis/wit/wiql</code></td>
+              <td>Core WIT query endpoint — exists in all TFS / ADO Server versions</td>
+            </tr>
+            <tr>
+              <td><code>/_apis/wit/workitemsbatch</code></td>
+              <td>Batch fetch endpoint — unchanged in ADO 2021</td>
+            </tr>
+            <tr>
+              <td><code>/_apis/work/teamsettings/iterations</code></td>
+              <td>Team iteration API — unchanged</td>
+            </tr>
+            <tr>
+              <td><code>/_workitems/edit/{id}</code> deep links</td>
+              <td>Work item URL pattern is identical in ADO Server 2021</td>
+            </tr>
+            <tr>
+              <td><code>/_queries/query/{id}</code> links</td>
+              <td>Query URL pattern unchanged</td>
+            </tr>
+            <tr>
+              <td>Basic Auth (PAT)</td>
+              <td><code>Authorization: Basic base64(:PAT)</code> mechanism is unchanged</td>
+            </tr>
+            <tr>
+              <td>Local snapshots folder</td>
+              <td>Stored locally as JSON — not affected by server migration at all</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Migration Checklist -->
+    <div class="sec" id="checklist">
+      <div class="sec-title teal">Migration Checklist</div>
+      <div class="note blue" style="margin-bottom:14px;">
+        Work through these steps in order on migration day. Estimated time: ~1 hour.
+      </div>
+      <div class="card">
+        <ul class="checklist">
+          <li>
+            <div>
+              <b>Get the new ADO Server 2021 URL from IT/admin</b>
+              <div class="sub">Format: <code>https://&lt;new-hostname&gt;/tfs/YourOrg/Healthcare%20IT</code></div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <b>Generate a new Personal Access Token in ADO Server 2021</b>
+              <div class="sub">User Settings (top right) → Personal Access Tokens → New Token → Scopes: Work Items (read), Code (read), Test (read)</div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <b>Update <code>config.json</code> — set <code>tfs.baseUrl</code>, <code>tfs.pat</code>, <code>tfs.apiVersion</code></b>
+              <div class="sub">See the <a href="#config-snippet" style="color:var(--primary);">Config Snippet</a> section below for exact format</div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <b>Restart the AV Dashboard server</b>
+              <div class="sub"><code>node server.js</code> from the dashboard root directory</div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <b>Open Settings → TFS Connection → click Test Connection</b>
+              <div class="sub">Should show green ✅. If red, double-check URL format and PAT scopes.</div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <b>Navigate to Overview — confirm PI list loads and data appears</b>
+              <div class="sub">Verifies WIQL + workitemsbatch + classificationnodes all work</div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <b>Check Quality → Versions tab — confirm defect data loads</b>
+              <div class="sub">Verifies <code>Custom.Defects.FixedPlannedVersion</code> and other custom fields exist</div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <b>Check PI Checks — confirm queries load from Shared Queries folder</b>
+              <div class="sub">Path: <code>Shared Queries / ICAP / Program Queries / TFSInconsistenciesQueryRepository</code></div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <b>Check Test Coverage tab — confirm test run data appears</b>
+              <div class="sub">If empty, test runs may need re-execution on the new server</div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <b>Check Sprint Capacity — confirm team iteration capacity loads</b>
+              <div class="sub">Uses <code>_apis/work/teamsettings/iterations/{id}/capacities</code></div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <b>Verify TFS deep links open correctly</b>
+              <div class="sub">Click any work item ID in the dashboard — should open in ADO Server 2021</div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <b>Take a new baseline snapshot for Scope Change Tracking</b>
+              <div class="sub">Old snapshots remain valid but reference the old server URL in TFS links</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Config Snippet -->
+    <div class="sec" id="config-snippet">
+      <div class="sec-title purple">Updated config.json — TFS Section</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">
+        Only the three highlighted lines need to change. All other settings remain the same.
+      </p>
+      <div class="cb green"><span class="cmt">// config.json — tfs section (update highlighted values only)</span>
+<span class="kw">"tfs"</span>: {
+  <span class="field">"baseUrl"</span>:      <span class="str">"https://&lt;new-ado-server&gt;/tfs/YourOrg/Healthcare%20IT"</span>,  <span class="cmt">// ← UPDATE</span>
+  <span class="field">"pat"</span>:           <span class="str">"&lt;new-PAT-from-ADO-2021&gt;"</span>,                                     <span class="cmt">// ← UPDATE</span>
+  <span class="field">"apiVersion"</span>:    <span class="str">"6.0"</span>,                                                       <span class="cmt">// ← UPDATE (was 5.0)</span>
+  <span class="field">"organization"</span>:  <span class="str">"YourOrg"</span>,                                              <span class="cmt">// unchanged</span>
+  <span class="field">"project"</span>:       <span class="str">"Healthcare IT"</span>,                                             <span class="cmt">// unchanged</span>
+  <span class="field">"areaPath"</span>:      <span class="str">"Healthcare IT"</span>,                                             <span class="cmt">// unchanged</span>
+  <span class="field">"iterationPath"</span>: <span class="str">"Healthcare IT\\ISP"</span>                                         <span class="cmt">// unchanged</span>
+}</div>
+    </div>
+
+    <!-- Troubleshooting -->
+    <div class="sec" id="troubleshooting">
+      <div class="sec-title red">Troubleshooting</div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Symptom</th><th>Likely Cause</th><th>Fix</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Dashboard shows "PAT not configured" or 401</td>
+              <td>Old PAT used, or PAT not yet saved</td>
+              <td>Generate new PAT in ADO 2021 → update <code>tfs.pat</code> in config.json → restart server</td>
+            </tr>
+            <tr>
+              <td>All sections show "No data" but no error</td>
+              <td>Wrong <code>baseUrl</code> — connection succeeds but returns empty results</td>
+              <td>Double-check Collection and Project name in the URL. Try opening the URL in a browser.</td>
+            </tr>
+            <tr>
+              <td>PI Checks tab shows query folder not found</td>
+              <td>Query folder path changed during migration</td>
+              <td>Locate the query folder in ADO 2021 → update path in Settings → PI Checks</td>
+            </tr>
+            <tr>
+              <td>Quality / Versions tab shows no defect fields</td>
+              <td><code>Custom.Defects.*</code> fields missing from process template</td>
+              <td>Check server logs for "Stripping unknown field" warnings. Contact ADO admin to verify custom field migration.</td>
+            </tr>
+            <tr>
+              <td>Test Coverage section is empty</td>
+              <td>Test runs not migrated or not yet executed</td>
+              <td>Run test suites in ADO 2021 to generate test run history. Historical runs may not migrate.</td>
+            </tr>
+            <tr>
+              <td>TFS work item links go to old server</td>
+              <td>Old <code>baseUrl</code> still saved in config.json</td>
+              <td>Ensure <code>tfs.baseUrl</code> is updated and server is restarted</td>
+            </tr>
+            <tr>
+              <td>Snapshot Scope Change shows stale data</td>
+              <td>Snapshots reference old server — compare still works but TFS links point to old URL</td>
+              <td>Take new snapshots after migration for accurate TFS links in scope change tracking</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note green" style="margin-top:8px;">
+        <strong>Server logs:</strong> Run <code>node server.js</code> from a terminal and watch the console output.
+        All TFS API errors are logged with the full URL and HTTP status code to help diagnose connection issues quickly.
+      </div>
+    </div>
+
+    <div style="margin-top:40px;padding-top:20px;border-top:1px solid var(--border);font-size:12px;color:var(--muted2);display:flex;justify-content:space-between;">
+      <span>AV Dashboard v2.2 · Healthcare IT ICAP ISP Programme</span>
+      <span>Migration Guide · May 2026</span>
+    </div>
+  </main>
+</div>
+</body>
+</html>
+
+

@@ -1,0 +1,77 @@
+{
+  "_comment": "Copy this file to config.json and fill in your values. Never commit config.json — it contains secrets.",
+  "_tfsHelp": {
+    "on-prem-tfs":  "baseUrl = https://your-server/tfs/YourOrg/YourProject  |  apiVersion = 5.0",
+    "ado-cloud":    "baseUrl = https://dev.azure.com/YourOrg/YourProject       |  apiVersion = 6.0",
+    "pat":          "Generate a Personal Access Token in Azure DevOps with scopes: Work Items (Read), Code (Read)"
+  },
+
+  "tfs": {
+    "organization": "YourOrganization",
+    "project": "YourProject",
+    "baseUrl": "https://dev.azure.com/YourOrg/YourProject",
+    "pat": "YOUR_PERSONAL_ACCESS_TOKEN_HERE",
+    "apiVersion": "6.0",
+    "areaPath": "YourProject\\YourTeam",
+    "teamRootPath": ["YourProject\\YourTeam"],
+    "iterationPath": "YourProject"
+  },
+
+  "app": {
+    "port": 3000,
+    "refreshIntervalMinutes": 30,
+    "defaultTheme": "dark",
+    "sessionSecret": "change-me-to-a-long-random-string"
+  },
+
+  "branding": {
+    "companyName": "Your Company",
+    "appName": "AV Dashboard",
+    "appSubtitle": "PI Programme Dashboard",
+    "logoType": "text",
+    "logoSvg": "",
+    "logoUrl": "",
+    "primaryColor": "#1492ff"
+  },
+
+  "auth": {
+    "localUsers": true,
+    "azureAD": {
+      "enabled": false,
+      "tenantId": "",
+      "clientId": "",
+      "clientSecret": "",
+      "redirectUri": "http://localhost:3000/auth/callback"
+    }
+  },
+
+  "defectEscapeRatio": {
+    "formula": "escaped / (escaped + caught) * 100",
+    "escapedStates": ["New", "Active"],
+    "caughtStates": ["Resolved", "Closed"]
+  },
+
+  "defectFields": {
+    "howFoundField":   "Microsoft.VSTS.CMMI.HowFound",
+    "whereFoundField": "",
+    "severityField":   "Microsoft.VSTS.Common.Severity",
+    "rankField":       "Microsoft.VSTS.Common.StackRank"
+  },
+
+  "sizeField": "Microsoft.VSTS.Scheduling.StoryPoints",
+
+  "ragThresholds": {
+    "doneRate":      { "green": 80, "amber": 50 },
+    "resolveRate":   { "green": 70, "amber": 40 },
+    "escapeRatio":   { "green": 20, "amber": 40 },
+    "healthScore":   { "green": 70, "amber": 40 },
+    "defectDensity": { "green": 1.5, "amber": 3.0 }
+  },
+
+  "notifications": {
+    "webhookUrl": "",
+    "webhookType": "teams",
+    "anomalyThreshold": 1.5,
+    "enabled": false
+  }
+}

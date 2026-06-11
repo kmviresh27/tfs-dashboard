@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AV Dashboard – Documentation</title>
+<style>
+  :root{
+    --primary:#0072db;--primary-hov:#0061c2;--primary-act:#0052a3;--primary-light:#1492ff;
+    --brand:#0b5ed7;--bg:#242424;--bg-card:#2B2B2B;--bg-card2:#363636;--bg-sidebar:#171717;
+    --text:#ffffff;--muted:#ADADAD;--border:#454545;--border-sub:#3D3D3D;
+    --success:#068443;--warning:#fa7000;--caution:#F5CC00;--danger:#eb3f3f;
+    --info:#5260FF;--violet:#858FFF;--orange:#ff7f0f;--teal:#21837c;
+    --radius:6px;--radius-lg:12px;--radius-pill:999px;
+    --shadow-sm:0 0 2px rgba(0,0,0,.32),0 4px 8px rgba(0,0,0,.64);
+    --shadow-lg:0 0 2px rgba(0,0,0,.32),0 16px 16px rgba(0,0,0,.16),0 24px 32px rgba(0,0,0,.32);
+    --motion-s:160ms;--motion-m:240ms;
+  }
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:64px 32px;}
+  .hub-header{text-align:center;margin-bottom:56px;}
+  .hub-badge{display:inline-block;background:rgba(20,146,255,.1);border:1px solid rgba(20,146,255,.3);color:var(--primary-light);padding:4px 14px;border-radius:var(--radius-pill);font-size:12px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;margin-bottom:16px;}
+  h1{font-size:40px;font-weight:700;margin-bottom:12px;background:linear-gradient(135deg,#1492ff,#858FFF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .sub{font-size:16px;color:var(--muted);}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px;max-width:1200px;width:100%;}
+  .card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px;text-decoration:none;color:inherit;transition:all var(--motion-s) ease;position:relative;overflow:hidden;box-shadow:var(--shadow-sm);}
+  .card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity var(--motion-s) ease;}
+  .card.blue::before{background:radial-gradient(ellipse at top left,rgba(20,146,255,.08),transparent 60%);}
+  .card.violet::before{background:radial-gradient(ellipse at top left,rgba(133,143,255,.08),transparent 60%);}
+  .card.green::before{background:radial-gradient(ellipse at top left,rgba(6,132,67,.08),transparent 60%);}
+  .card.amber::before{background:radial-gradient(ellipse at top left,rgba(232,162,23,.08),transparent 60%);}
+  .card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.12);box-shadow:var(--shadow-lg);}
+  .card:hover::before{opacity:1;}
+  .card-icon{font-size:36px;margin-bottom:16px;}
+  .card-title{font-size:20px;font-weight:700;margin-bottom:8px;}
+  .card.blue .card-title{color:var(--primary-light);}
+  .card.violet .card-title{color:var(--violet);}
+  .card.green .card-title{color:var(--success);}
+  .card.amber .card-title{color:#e8a217;}
+  .card-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px;}
+  .card-sections{display:flex;flex-wrap:wrap;gap:6px;}
+  .tag{background:var(--bg-card2);border:1px solid var(--border);padding:3px 8px;border-radius:var(--radius);font-size:11px;color:var(--muted);}
+  .card-arrow{position:absolute;bottom:24px;right:24px;font-size:20px;opacity:.3;transition:all var(--motion-s) ease;}
+  .card:hover .card-arrow{opacity:1;transform:translateX(4px);}
+  .footer{margin-top:56px;text-align:center;font-size:12px;color:var(--muted);}
+  .stack{display:flex;gap:8px;justify-content:center;margin-top:24px;flex-wrap:wrap;}
+  .stack-badge{background:var(--bg-card);border:1px solid var(--border);padding:6px 14px;border-radius:var(--radius-pill);font-size:12px;color:var(--muted);font-weight:700;}
+  .back-btn{display:inline-flex;align-items:center;gap:6px;margin-bottom:32px;padding:8px 16px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-pill);color:var(--muted);font-size:13px;text-decoration:none;transition:all var(--motion-s) ease;}
+  .back-btn:hover{color:var(--text);border-color:rgba(255,255,255,.2);}
+</style>
+</head>
+<body>
+  <a href="/" class="back-btn">&#8592; Back to Dashboard</a>
+
+  <div class="hub-header">
+    <div class="hub-badge">&#128214; Documentation</div>
+    <h1>AV Dashboard</h1>
+    <div class="sub">Azure DevOps / TFS Live Programme Dashboard</div>
+    <div class="stack">
+      <div class="stack-badge">&#9881; Node.js 18+</div>
+      <div class="stack-badge">&#127758; Express 4.x</div>
+      <div class="stack-badge">&#10006; React 19</div>
+      <div class="stack-badge">&#9889; Vite</div>
+      <div class="stack-badge">&#128202; Chart.js 4.x</div>
+      <div class="stack-badge">&#128279; ADO / TFS REST API</div>
+      <div class="stack-badge">&#128273; PAT Auth</div>
+      <div class="stack-badge">&#127970; Multi-Tenant</div>
+    </div>
+  </div>
+
+  <div class="cards">
+    <a class="card blue" href="settings-guide.html">
+      <div class="card-icon">&#9881;&#65039;</div>
+      <div class="card-title">Settings Guide</div>
+      <div class="card-desc">Detailed configuration reference for all settings tabs, deployment &amp; onboarding checklists, default values, and config.json schema.</div>
+      <div class="card-sections">
+        <span class="tag">&#128640; Deploy Checklist</span>
+        <span class="tag">&#128101; Onboarding</span>
+        <span class="tag">TFS Connection</span>
+        <span class="tag">Field Mappings</span>
+        <span class="tag">RAG Thresholds</span>
+        <span class="tag">Notifications</span>
+        <span class="tag">Azure AD</span>
+        <span class="tag">Policies</span>
+      </div>
+      <div class="card-arrow">&#8594;</div>
+    </a>
+
+    <a class="card violet" href="user-manual.html">
+      <div class="card-icon">&#128214;</div>
+      <div class="card-title">User Manual</div>
+      <div class="card-desc">Step-by-step guide for all dashboard sections, filters, snapshots, TFS links, and settings. Everything a user needs to get productive.</div>
+      <div class="card-sections">
+        <span class="tag">Getting Started</span>
+        <span class="tag">Navigation</span>
+        <span class="tag">All Sections</span>
+        <span class="tag">Snapshots</span>
+        <span class="tag">TFS Links</span>
+        <span class="tag">Settings</span>
+        <span class="tag">Troubleshooting</span>
+      </div>
+      <div class="card-arrow">&#8594;</div>
+    </a>
+
+    <a class="card amber" href="ado-upgrade-guide.html">
+      <div class="card-icon">&#128295;</div>
+      <div class="card-title">ADO / TFS Setup Guide</div>
+      <div class="card-desc">Configuring AV Dashboard for Azure DevOps cloud or on-prem TFS. Covers connection settings, sprint naming, field mapping, and migration.</div>
+      <div class="card-sections">
+        <span class="tag">ADO Cloud</span>
+        <span class="tag">On-Prem TFS</span>
+        <span class="tag">Sprint Naming</span>
+        <span class="tag">Field Mapping</span>
+        <span class="tag">PAT Setup</span>
+        <span class="tag">Troubleshooting</span>
+      </div>
+      <div class="card-arrow">&#8594;</div>
+    </a>
+
+    <a class="card green" href="TFS-FIELD-DICTIONARY.md" target="_blank">
+      <div class="card-icon">&#128203;</div>
+      <div class="card-title">Field Dictionary</div>
+      <div class="card-desc">Reference for Azure DevOps / TFS field names, states, and custom field conventions used across the dashboard.</div>
+      <div class="card-sections">
+        <span class="tag">System Fields</span>
+        <span class="tag">VSTS Fields</span>
+        <span class="tag">Custom Fields</span>
+        <span class="tag">Work Item States</span>
+        <span class="tag">WIQL Reference</span>
+      </div>
+      <div class="card-arrow">&#8594;</div>
+    </a>
+
+    <a class="card" href="checklists.html" style="border-color:rgba(6,132,67,.25);">
+      <div class="card-icon">&#9989;</div>
+      <div class="card-title" style="color:#4ade80;">Deployment Checklists</div>
+      <div class="card-desc">Interactive checklists for every deployment scenario. Progress saves in your browser. Print-ready.</div>
+      <div class="card-sections">
+        <span class="tag">&#128204; Fresh Install</span>
+        <span class="tag">&#128260; TFS &#8594; ADO Migration</span>
+        <span class="tag">&#127962; New Department</span>
+        <span class="tag">&#128640; Go-Live</span>
+        <span class="tag">&#11014;&#65039; Version Upgrade</span>
+        <span class="tag">&#128100; User Onboarding</span>
+      </div>
+      <div class="card-arrow">&#8594;</div>
+    </a>
+  </div>
+
+  <div class="footer">
+    <p>AV Dashboard &middot; Multi-Tenant Azure DevOps Programme Dashboard</p>
+    <p style="margin-top:8px;">Works with Azure DevOps cloud (dev.azure.com) and on-prem TFS / Azure DevOps Server</p>
+  </div>
+</body>
+</html>
